@@ -334,6 +334,43 @@ select option{background:var(--surface)}
 <!-- ══════════════════════════════════
      LOGIN SCREEN
 ══════════════════════════════════ -->
+<!-- ══ شاشة انتهاء الاشتراك ══ -->
+<div id="expired-screen" style="display:none;position:fixed;inset:0;z-index:10000;background:linear-gradient(135deg,#0d1117,#161b22);font-family:'Cairo',sans-serif;overflow-y:auto;align-items:flex-start;justify-content:center">
+  <div style="width:100%;max-width:520px;padding:2rem;text-align:center;margin:auto">
+    <div style="width:80px;height:80px;background:linear-gradient(135deg,#f85149,#b91c1c);border-radius:20px;display:grid;place-items:center;font-size:2.5rem;margin:0 auto 1.5rem;box-shadow:0 8px 32px rgba(248,81,73,.3)">⏰</div>
+    <h1 style="font-size:1.6rem;font-weight:900;color:#e6edf3;margin-bottom:.5rem">انتهت صلاحية الاشتراك</h1>
+    <p style="color:#8b949e;font-size:.9rem;margin-bottom:2rem">للاستمرار في استخدام النظام يرجى تجديد اشتراكك</p>
+
+    <!-- بطاقات الأسعار -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:2rem">
+      <!-- شهري -->
+      <div style="background:#161b22;border:1px solid #30363d;border-radius:16px;padding:1.5rem;text-align:center">
+        <div style="font-size:.85rem;color:#8b949e;font-weight:700;margin-bottom:.5rem">🗓️ شهري</div>
+        <div style="font-size:2rem;font-weight:900;color:#58a6ff" id="price-monthly">—</div>
+        <div style="font-size:.75rem;color:#8b949e;margin-bottom:1rem">درهم / شهر</div>
+        <button onclick="requestSubscription('monthly')" style="width:100%;padding:.7rem;background:#1f6feb;color:#fff;border:none;border-radius:9px;font-family:'Cairo',sans-serif;font-size:.88rem;font-weight:700;cursor:pointer">اشترك الآن</button>
+      </div>
+      <!-- سنوي -->
+      <div style="background:#0d2818;border:2px solid #196c2e;border-radius:16px;padding:1.5rem;text-align:center;position:relative">
+        <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:#3fb950;color:#0d1117;font-size:.7rem;font-weight:900;padding:.2rem .75rem;border-radius:20px">الأوفر ⭐</div>
+        <div style="font-size:.85rem;color:#3fb950;font-weight:700;margin-bottom:.5rem">📅 سنوي</div>
+        <div style="font-size:2rem;font-weight:900;color:#3fb950" id="price-yearly">—</div>
+        <div style="font-size:.75rem;color:#8b949e;margin-bottom:.3rem">درهم / سنة</div>
+        <div style="font-size:.72rem;color:#3fb950;margin-bottom:1rem" id="price-yearly-save">وفّر —</div>
+        <button onclick="requestSubscription('yearly')" style="width:100%;padding:.7rem;background:#196c2e;color:#fff;border:none;border-radius:9px;font-family:'Cairo',sans-serif;font-size:.88rem;font-weight:700;cursor:pointer">اشترك الآن</button>
+      </div>
+    </div>
+
+    <div id="subscription-sent" style="display:none;background:#0d2818;border:1px solid #196c2e;border-radius:12px;padding:1.25rem;margin-bottom:1.5rem">
+      <div style="font-size:1.5rem;margin-bottom:.5rem">✅</div>
+      <div style="color:#3fb950;font-weight:700;margin-bottom:.35rem">تم إرسال طلب الاشتراك</div>
+      <div style="color:#8b949e;font-size:.82rem">سيتم التواصل معك خلال 24 ساعة لإتمام الدفع وتفعيل الحساب</div>
+    </div>
+
+    <button onclick="document.getElementById('expired-screen').style.display='none';document.getElementById('login-screen').style.display='flex'" style="background:transparent;border:1px solid #30363d;color:#8b949e;border-radius:9px;padding:.6rem 1.5rem;font-family:'Cairo',sans-serif;cursor:pointer;font-size:.82rem">← رجوع لتسجيل الدخول</button>
+  </div>
+</div>
+
 <div id="login-screen" style="
   position:fixed;inset:0;z-index:9999;
   background:linear-gradient(135deg,#0d1117 0%,#161b22 50%,#0d1117 100%);
@@ -456,6 +493,7 @@ select option{background:var(--surface)}
   <button onclick="goPage('page-analytics',this)" id="nav-btn-analytics"><span id="nav-analytics">📈 إحصائيات</span></button>
   <button onclick="goPage('page-docs',this)" id="nav-btn-docs"><span id="nav-docs">📂 ملفات المعلم</span></button>
   <button onclick="requireAdmin('page-admin',this)" id="nav-btn-admin"><span id="nav-admin">⚙️ الإدارة</span></button>
+  <button onclick="goPage('page-owner',this)" id="nav-btn-owner" style="display:none;color:var(--warn)"><span>👑 لوحة المالك</span></button>
 </div>
 
 <main>
@@ -1122,6 +1160,59 @@ select option{background:var(--surface)}
   </div>
 </div>
 
+
+<!-- ══ OWNER PANEL PAGE ══ -->
+<div class="page" id="page-owner">
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">👑 لوحة تحكم المالك</div>
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+        <button class="btn btn-success btn-sm" onclick="ownerAddSchool()">➕ إضافة مدرسة</button>
+        <button class="btn btn-ghost btn-sm" onclick="ownerRefresh()">🔄 تحديث</button>
+      </div>
+    </div>
+    <!-- إحصائيات سريعة -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.75rem;margin-bottom:1.25rem">
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:1rem;text-align:center">
+        <div style="font-size:1.6rem;font-weight:900;color:var(--accent)" id="owner-stat-total">—</div>
+        <div style="font-size:.75rem;color:var(--muted);margin-top:.2rem">إجمالي المدارس</div>
+      </div>
+      <div style="background:var(--surface2);border:1px solid var(--p-border);border-radius:10px;padding:1rem;text-align:center">
+        <div style="font-size:1.6rem;font-weight:900;color:var(--accent2)" id="owner-stat-active">—</div>
+        <div style="font-size:.75rem;color:var(--muted);margin-top:.2rem">نشطة</div>
+      </div>
+      <div style="background:var(--surface2);border:1px solid var(--a-border);border-radius:10px;padding:1rem;text-align:center">
+        <div style="font-size:1.6rem;font-weight:900;color:var(--danger)" id="owner-stat-inactive">—</div>
+        <div style="font-size:.75rem;color:var(--muted);margin-top:.2rem">موقوفة</div>
+      </div>
+      <div style="background:var(--surface2);border:1px solid var(--l-border);border-radius:10px;padding:1rem;text-align:center">
+        <div style="font-size:1.6rem;font-weight:900;color:var(--warn)" id="owner-stat-expiring">—</div>
+        <div style="font-size:.75rem;color:var(--muted);margin-top:.2rem">تنتهي قريباً</div>
+      </div>
+    </div>
+    <!-- جدول المدارس -->
+    <div style="overflow-x:auto">
+      <table class="data-table" id="owner-schools-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>اسم المدرسة</th>
+            <th>school_id</th>
+            <th>المدرسون</th>
+            <th>الطلاب</th>
+            <th>الاشتراك</th>
+            <th>تاريخ الانتهاء</th>
+            <th>الحالة</th>
+            <th>إجراءات</th>
+          </tr>
+        </thead>
+        <tbody id="owner-schools-body">
+          <tr><td colspan="9" style="text-align:center;color:var(--muted);padding:2rem">جاري التحميل...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
 </main>
 
 <!-- ── AUTO SAVE BAR ── -->
@@ -1216,7 +1307,7 @@ select option{background:var(--surface)}
 ════════════════════════════════ */
 const GS_URL  = 'https://ttsnxvlzuuyaovnaocrt.supabase.co';
 const GS_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR0c254dmx6dXV5YW92bmFvY3J0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5NTczMzgsImV4cCI6MjA5MjUzMzMzOH0.GanxRgaj1AD7g0ZraUlRpyFpi4YQXlTwGRzlHGgrQgE';
-const GS_H    = {'Content-Type':'application/json','apikey':GS_KEY,'Authorization':'Bearer '+GS_KEY,'Prefer':'resolution=merge-duplicates'};
+const GS_H    = {'Content-Type':'application/json','apikey':GS_KEY,'Authorization':'Bearer '+GS_KEY,'Prefer':'resolution=merge-duplicates,return=representation'};
 
 /* ════════════════════════════════════
    LANGUAGE / i18n
@@ -3464,6 +3555,7 @@ function goPage(id, btn) {
     const navBtns = document.querySelectorAll('.top-nav button');
     navBtns.forEach(b => { if (b.getAttribute('onclick') && b.getAttribute('onclick').includes(id)) b.classList.add('active'); });
   }
+  if (id === 'page-owner') setTimeout(ownerRefresh, 100);
   updateGlobalBackBtn();
   if (id === 'page-dashboard') renderDashboard();
   else if (id === 'page-records') { populateRecFilters(); renderRecords(); }
@@ -3614,6 +3706,8 @@ function _restoreLoginSession(){
       _updateRoleBadge(u.role);
       const adminBtn = document.getElementById('nav-btn-admin');
       if(adminBtn) adminBtn.style.display = (u.role === 'admin' || u.role === 'superadmin') ? '' : 'none';
+      const ownerBtn2 = document.getElementById('nav-btn-owner');
+      if (ownerBtn2) ownerBtn2.style.display = u.role === 'superadmin' ? '' : 'none';
     }
   }catch(e){}
 }
@@ -4576,7 +4670,7 @@ async function gsUpload(){
   toast('⬆️ جاري الرفع...','inf');
   try{
     // رفع بيانات المدرسة
-    await fetch(GS_URL+'/rest/v1/school_data?on_conflict=key',{method:'POST',headers:{...GS_H,'Prefer':'resolution=merge-duplicates'},
+    await fetch(GS_URL+'/rest/v1/school_data',{method:'POST',headers:{...GS_H,'Prefer':'resolution=merge-duplicates,return=minimal'},
       body:JSON.stringify([
         {key:'teachers',value:DB.teachers},
         {key:'classes', value:DB.classes},
@@ -4597,7 +4691,7 @@ async function gsUpload(){
       status:s.status||'',note:s.note||'',saved_at:rec.savedAt||''
     })));
     for(let i=0;i<rows.length;i+=100){
-      await fetch(GS_URL+'/rest/v1/attendance_records?on_conflict=id',{method:'POST',headers:{...GS_H,'Prefer':'resolution=merge-duplicates'},body:JSON.stringify(rows.slice(i,i+100))});
+      await fetch(GS_URL+'/rest/v1/attendance_records',{method:'POST',headers:{...GS_H,'Prefer':'resolution=merge-duplicates,return=minimal'},body:JSON.stringify(rows.slice(i,i+100))});
     }
     gsSetStatus('ok'); gsSetLast();
     toast('☁️ تمت المزامنة بنجاح!','ok');
@@ -4665,7 +4759,7 @@ async function gsSyncAuto(){
       student_id:s.id||'',student_name:s.name||'',student_num:s.num||'',
       status:s.status||'',note:s.note||'',saved_at:rec.savedAt||''
     })));
-    if(rows.length)await fetch(GS_URL+'/rest/v1/attendance_records?on_conflict=id',{method:'POST',headers:{...GS_H,'Prefer':'resolution=merge-duplicates'},body:JSON.stringify(rows)});
+    if(rows.length)await fetch(GS_URL+'/rest/v1/attendance_records',{method:'POST',headers:{...GS_H,'Prefer':'resolution=merge-duplicates,return=minimal'},body:JSON.stringify(rows)});
     gsSetStatus('ok'); gsSetLast();
     toast('☁️ تمت المزامنة','ok');
   }catch(e){console.warn('gsSyncAuto:',e);}
@@ -4782,6 +4876,8 @@ function _loginSuccess(found) {
   _updateRoleBadge(found.role);
   const adminBtn = document.getElementById('nav-btn-admin');
   if (adminBtn) adminBtn.style.display = (found.role === 'admin' || found.role === 'superadmin') ? '' : 'none';
+  const ownerBtn = document.getElementById('nav-btn-owner');
+  if (ownerBtn) ownerBtn.style.display = found.role === 'superadmin' ? '' : 'none';
 }
 
 async function doAppLogin() {
@@ -6033,6 +6129,168 @@ function exportActivityLog(){
   a.download = `activity_log_${new Date().toISOString().slice(0,10)}.csv`;
   a.click();
   toast('📊 تم تصدير السجل','ok');
+}
+
+// ══════════════════════════════════════════════
+// 💳 SUBSCRIPTION SYSTEM
+// ══════════════════════════════════════════════
+const SUB_PRICES = { monthly: 99, yearly: 899 };
+let CURRENT_SCHOOL_ID = null;
+
+async function checkSubscription(schoolId) {
+  if (!schoolId) return true;
+  CURRENT_SCHOOL_ID = schoolId;
+  try {
+    const r = await fetch(GS_URL + `/rest/v1/schools?school_id=eq.${schoolId}&select=active,expires_at,name,plan`, {
+      headers: { apikey: GS_KEY, 'Authorization': 'Bearer ' + GS_KEY }
+    });
+    const data = await r.json();
+    if (!Array.isArray(data) || !data.length) return true;
+    const school = data[0];
+    const now = new Date();
+    const exp = school.expires_at ? new Date(school.expires_at) : null;
+    if (!school.active || (exp && exp < now)) {
+      showExpiredScreen(school);
+      return false;
+    }
+    if (exp) {
+      const daysLeft = Math.ceil((exp - now) / (1000*60*60*24));
+      if (daysLeft <= 7) setTimeout(() => toast(`⚠️ اشتراكك ينتهي خلال ${daysLeft} أيام — تواصل مع المشرف للتجديد`, 'warn'), 2000);
+    }
+    return true;
+  } catch(e) { return true; }
+}
+
+function showExpiredScreen(school) {
+  const monthly = SUB_PRICES.monthly;
+  const yearly  = SUB_PRICES.yearly;
+  const saving  = Math.round((monthly * 12 - yearly) / (monthly * 12) * 100);
+  const pm = document.getElementById('price-monthly');
+  const py = document.getElementById('price-yearly');
+  const ps = document.getElementById('price-yearly-save');
+  if (pm) pm.textContent = monthly;
+  if (py) py.textContent = yearly;
+  if (ps) ps.textContent = `وفّر ${saving}% مقارنة بالشهري`;
+  const el = document.getElementById('expired-screen');
+  if (el) el.style.display = 'flex';
+  document.getElementById('login-screen').style.display = 'none';
+}
+
+async function requestSubscription(plan) {
+  const schoolId = CURRENT_SCHOOL_ID || 'غير محدد';
+  const price = plan === 'yearly' ? SUB_PRICES.yearly : SUB_PRICES.monthly;
+  try {
+    await fetch(GS_URL + '/rest/v1/subscription_requests', {
+      method: 'POST',
+      headers: { ...GS_H, 'Prefer': 'return=minimal' },
+      body: JSON.stringify({ school_id: schoolId, plan, price, status: 'pending', requested_at: new Date().toISOString() })
+    });
+  } catch(e) {}
+  const sent = document.getElementById('subscription-sent');
+  if (sent) sent.style.display = 'block';
+  toast(`✅ تم إرسال طلب الاشتراك`, 'ok');
+}
+
+// ══════════════════════════════════════════════
+// 👑 OWNER PANEL FUNCTIONS
+// ══════════════════════════════════════════════
+const OWNER_URL = GS_URL + '/rest/v1/schools';
+const OWNER_H   = { apikey: GS_KEY, 'Authorization': 'Bearer ' + GS_KEY, 'Content-Type': 'application/json', 'Prefer': 'resolution=merge-duplicates,return=representation' };
+
+async function ownerRefresh() {
+  const tbody = document.getElementById('owner-schools-body');
+  if (!tbody) return;
+  tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:2rem">⏳ جاري التحميل...</td></tr>';
+  try {
+    const r = await fetch(OWNER_URL + '?order=created_at.desc', { headers: OWNER_H });
+    const schools = await r.json();
+    if (!Array.isArray(schools) || !schools.length) {
+      tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:2rem">لا توجد مدارس مسجلة بعد</td></tr>';
+      ['total','active','inactive','expiring'].forEach(k => { const el=document.getElementById('owner-stat-'+k); if(el) el.textContent='0'; });
+      return;
+    }
+    const today = new Date();
+    const soon  = new Date(); soon.setDate(soon.getDate() + 14);
+    let active = 0, inactive = 0, expiring = 0;
+    tbody.innerHTML = schools.map((s, i) => {
+      const exp = s.expires_at ? new Date(s.expires_at) : null;
+      const isActive = s.active && (!exp || exp > today);
+      const isExpiring = isActive && exp && exp <= soon;
+      if (isActive) active++; else inactive++;
+      if (isExpiring) expiring++;
+      const expStr = exp ? exp.toLocaleDateString('ar-SA-u-nu-latn') : '—';
+      const statusBadge = isActive ? `<span class="badge badge-p" style="font-size:.72rem">✅ نشط</span>` : `<span class="badge badge-a" style="font-size:.72rem">❌ موقوف</span>`;
+      const expBadge = isExpiring ? `<span style="color:var(--warn);font-size:.72rem">⚠️ ${expStr}</span>` : `<span style="font-size:.78rem">${expStr}</span>`;
+      const plan = s.plan === 'yearly' ? '📅 سنوي' : s.plan === 'monthly' ? '🗓️ شهري' : '—';
+      const safeName = (s.name||'').replace(/'/g,"\'");
+      return `<tr>
+        <td>${i+1}</td>
+        <td><strong>${s.name||'—'}</strong><br><small style="color:var(--muted);font-size:.7rem">${s.contact||''}</small></td>
+        <td><code style="font-size:.7rem;color:var(--muted)">${s.school_id||'—'}</code></td>
+        <td style="text-align:center">${s.teachers_count||0}</td>
+        <td style="text-align:center">${s.students_count||0}</td>
+        <td>${plan}</td>
+        <td>${expBadge}</td>
+        <td>${statusBadge}</td>
+        <td><div class="actions" style="flex-wrap:wrap;gap:.3rem">
+          ${isActive ? `<button class="btn btn-danger btn-sm" onclick="ownerToggle('${s.school_id}',false)">⏸ إيقاف</button>` : `<button class="btn btn-success btn-sm" onclick="ownerToggle('${s.school_id}',true)">▶ تفعيل</button>`}
+          <button class="btn btn-warn btn-sm" onclick="ownerRenew('${s.school_id}','${safeName}')">🔄 تجديد</button>
+          <button class="btn btn-ghost btn-sm" onclick="ownerEdit('${s.school_id}','${safeName}','${s.contact||''}','${s.plan||''}')">✏️</button>
+        </div></td>
+      </tr>`;
+    }).join('');
+    document.getElementById('owner-stat-total').textContent    = schools.length;
+    document.getElementById('owner-stat-active').textContent   = active;
+    document.getElementById('owner-stat-inactive').textContent = inactive;
+    document.getElementById('owner-stat-expiring').textContent = expiring;
+  } catch(e) {
+    tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;color:var(--danger);padding:2rem">❌ خطأ: ${e.message}</td></tr>`;
+  }
+}
+
+async function ownerToggle(school_id, active) {
+  if (!confirm(active ? `تفعيل هذه المدرسة؟` : `إيقاف هذه المدرسة؟`)) return;
+  await fetch(OWNER_URL + `?school_id=eq.${school_id}`, { method:'PATCH', headers:OWNER_H, body:JSON.stringify({active}) });
+  toast(active ? '✅ تم التفعيل' : '⏸ تم الإيقاف', 'ok');
+  ownerRefresh();
+}
+
+async function ownerRenew(school_id, name) {
+  const months = prompt(`تجديد اشتراك "${name}"
+عدد الأشهر:`);
+  if (!months || isNaN(months) || +months < 1) return;
+  const exp = new Date(); exp.setMonth(exp.getMonth() + parseInt(months));
+  await fetch(OWNER_URL + `?school_id=eq.${school_id}`, { method:'PATCH', headers:OWNER_H, body:JSON.stringify({expires_at:exp.toISOString(),active:true}) });
+  toast(`✅ تم التجديد حتى ${exp.toLocaleDateString('ar-SA-u-nu-latn')}`, 'ok');
+  ownerRefresh();
+}
+
+async function ownerEdit(school_id, name, contact, plan) {
+  const newName = prompt('اسم المدرسة:', name); if (!newName) return;
+  const newContact = prompt('جهة التواصل:', contact) || '';
+  const newPlan = prompt('نوع الاشتراك (monthly/yearly):', plan||'monthly') || 'monthly';
+  await fetch(OWNER_URL + `?school_id=eq.${school_id}`, { method:'PATCH', headers:OWNER_H, body:JSON.stringify({name:newName,contact:newContact,plan:newPlan}) });
+  toast('✅ تم التحديث', 'ok'); ownerRefresh();
+}
+
+async function ownerAddSchool() {
+  const name = prompt('اسم المدرسة الجديدة:'); if (!name||!name.trim()) return;
+  const contact = prompt('جهة التواصل (اختياري):') || '';
+  const plan = prompt('نوع الاشتراك (monthly/yearly):', 'monthly') || 'monthly';
+  const months = parseInt(prompt('مدة الاشتراك بالأشهر:', '1')||'1');
+  const exp = new Date(); exp.setMonth(exp.getMonth()+months);
+  const school_id = 'sch_'+Date.now();
+  await fetch(OWNER_URL, { method:'POST', headers:OWNER_H, body:JSON.stringify({school_id,name:name.trim(),contact,plan,active:true,expires_at:exp.toISOString(),teachers_count:0,students_count:0}) });
+  toast('✅ تمت الإضافة — school_id: '+school_id, 'ok');
+  ownerRefresh();
+}
+
+// طلبات الاشتراك
+async function ownerLoadRequests() {
+  try {
+    const r = await fetch(GS_URL+'/rest/v1/subscription_requests?order=requested_at.desc', { headers: OWNER_H });
+    return await r.json();
+  } catch(e) { return []; }
 }
 </script>
 
