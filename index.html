@@ -5642,6 +5642,8 @@ async function gsPull(){
           window._cachedAppUsers=it.value;
           _idbSet(USERS_IDB_KEY,it.value);
           if(typeof renderAppUsers==='function')setTimeout(renderAppUsers,200);
+          // تحديث فوري لقائمة المستخدمين المعتمدين
+          window.__appUsersLoaded = true;
         }
       });
     }
@@ -5816,6 +5818,17 @@ async function doAppLogin() {
   const pass  = (document.getElementById('login-password').value || '').trim();
   const err   = document.getElementById('login-err');
   const loginBtn = document.getElementById('login-submit-btn');
+  if(!uname||!pass){err.textContent='أدخل اسم المستخدم وكلمة المرور';return;}
+  if(loginBtn){loginBtn.disabled=true;loginBtn.textContent='جاري التحقق...';}
+  // سحب أحدث بيانات المستخدمين من السحابة قبل التحقق
+  try{
+    const cloudUsers = await _pullUsersFromCloud();
+    if(cloudUsers && cloudUsers.length){
+      window._cachedAppUsers = cloudUsers;
+      await _idbSet(USERS_IDB_KEY, cloudUsers);
+    }
+  }catch(e){}
+  if(loginBtn){loginBtn.disabled=false;loginBtn.textContent='دخول';}
   err.style.display = 'none';
   if (!uname || !pass) { err.style.display = 'block'; return; }
 
