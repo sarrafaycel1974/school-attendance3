@@ -5949,125 +5949,126 @@ function getAllowedClassIds(){
 }
 
 // إضافة قسم إدارة المستخدمين في لوحة الإدارة
-(function patchAdminWithUsers(){
-  const origRenderAdmin = window.renderAdmin;
-  if(typeof origRenderAdmin !== 'function') return;
-  window.renderAdmin = function(){
-    origRenderAdmin();
-    // أضف بطاقة إدارة المستخدمين إذا لم تكن موجودة
-    if(document.getElementById('users-mgmt-card')) return;
-    const adminPage = document.getElementById('page-admin');
-    if(!adminPage) return;
-    const card = document.createElement('div');
-    card.className = 'card';
-    card.id = 'users-mgmt-card';
-    card.style.marginTop = '1.25rem';
-    card.innerHTML = `
-      <div class="card-head">
-        <div class="card-title">👥 إدارة المستخدمين</div>
-        <div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap">
-          <button class="btn btn-ghost btn-sm" onclick="syncUsersCloud()" title="مزامنة كلمات المرور مع السحابة">☁️ مزامنة كلمات المرور</button>
-          <button class="btn btn-primary btn-sm" onclick="addAppUser()">+ إضافة مستخدم</button>
+/* ══ إدارة المستخدمين — يُحقن في renderAdmin بشكل موثوق ══ */
+(function hookUsersPanel(){
+  function tryHook(){
+    if(typeof window.renderAdmin !== 'function'){ setTimeout(tryHook,200); return; }
+    const _orig = window.renderAdmin;
+    window.renderAdmin = function(){
+      _orig.apply(this,arguments);
+      /* احذف البطاقة القديمة وأعد بناءها في كل مرة */
+      const old = document.getElementById('users-mgmt-card');
+      if(old) old.remove();
+      const adminPage = document.getElementById('page-admin');
+      if(!adminPage) return;
+      const lu = (()=>{ try{ return JSON.parse(sessionStorage.getItem('aj_logged_user')); }catch(e){ return null; } })();
+      /* المعلم لا يرى قسم المستخدمين */
+      if(lu && lu.role === 'teacher') return;
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.id = 'users-mgmt-card';
+      card.style.marginTop = '1.25rem';
+      card.innerHTML = `
+        <div class="card-head">
+          <div class="card-title">👥 إدارة المستخدمين</div>
+          <div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap">
+            <button class="btn btn-ghost btn-sm" onclick="syncUsersCloud()">☁️ مزامنة</button>
+            <button class="btn btn-primary btn-sm" onclick="addAppUser()">➕ إضافة مستخدم</button>
+          </div>
         </div>
-      </div>
-      <div id="users-sync-status" style="font-size:.75rem;color:var(--muted);margin-bottom:.6rem"></div>
-      <div id="users-list"></div>
-    `;
-    adminPage.querySelector('main, .page') ? adminPage.appendChild(card) : adminPage.appendChild(card);
-    renderAppUsers();
-  };
+        <div id="users-sync-status" style="font-size:.75rem;color:var(--muted);margin-bottom:.6rem"></div>
+        <div id="users-list"><div style="text-align:center;padding:1.5rem;color:var(--muted)">⏳ جاري تحميل المستخدمين...</div></div>
+      `;
+      adminPage.appendChild(card);
+      renderAppUsers();
+    };
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',tryHook);
+  else tryHook();
 })();
 
 async function renderAppUsers(){
   const el = document.getElementById('users-list');
   if(!el) return;
 
-  /* إذا ما في مستخدمين محملين بعد — اسحب من السحابة أولاً */
-  if(!window._cachedAppUsers || window._cachedAppUsers.length === 0){
-    el.innerHTML = '<div style="text-align:center;padding:1rem;color:var(--muted)">⏳ جاري تحميل المستخدمين...</div>';
-    try{
-      const cloud = await _pullUsersFromCloud();
-      if(cloud && cloud.length){
-        window._cachedAppUsers = cloud;
-        await _idbSet(USERS_IDB_KEY, cloud);
-      }
-    }catch(e){}
-  }
+  el.innerHTML = '<div style="text-align:center;padding:1.5rem;color:var(--muted)">⏳ جاري تحميل المستخدمين...</div>';
 
-  const _lu = (()=>{ try{ return JSON.parse(sessionStorage.getItem('aj_logged_user')); }catch(e){ return null; } })();
+  /* دائماً اسحب آخر نسخة من السحابة */
+  try{
+    const cloud = await _pullUsersFromCloud();
+    if(cloud && cloud.length){
+      window._cachedAppUsers = cloud;
+      await _idbSet(USERS_IDB_KEY, cloud);
+    }
+  }catch(e){}
+
+  const lu = (()=>{ try{ return JSON.parse(sessionStorage.getItem('aj_logged_user')); }catch(e){ return null; } })();
   const allUsers = getAppUsers();
 
-  /* فلترة حسب الدور */
-  let visibleUsers;
-  if(!_lu || _lu.role === 'superadmin'){
-    /* سوبر أدمن يشوف الكل */
-    visibleUsers = allUsers.map((u,realIdx)=>({...u, _realIdx: realIdx}));
-  } else if(_lu.role === 'admin'){
-    /* أدمن يشوف اللي أضافهم + نفسه */
-    visibleUsers = allUsers
-      .map((u,realIdx)=>({...u, _realIdx: realIdx}))
-      .filter(u => u.addedBy === _lu.username || u.username === _lu.username);
+  /* فلترة صارمة حسب الدور */
+  let visible;
+  if(!lu || lu.role === 'superadmin'){
+    visible = allUsers.map((u,i)=>({...u,_i:i}));
+  } else if(lu.role === 'admin'){
+    visible = allUsers.map((u,i)=>({...u,_i:i}))
+      .filter(u => u.addedBy === lu.username || u.username === lu.username);
   } else {
-    /* معلم يشوف نفسه فقط */
-    visibleUsers = allUsers
-      .map((u,realIdx)=>({...u, _realIdx: realIdx}))
-      .filter(u => u.username === _lu.username);
+    visible = allUsers.map((u,i)=>({...u,_i:i}))
+      .filter(u => u.username === lu.username);
   }
 
-  if(!visibleUsers.length){
-    el.innerHTML='<div class="empty"><div class="ei">👥</div>لا يوجد مستخدمون</div>';
+  if(!visible.length){
+    el.innerHTML='<div class="empty"><div class="ei">👥</div>لا يوجد مستخدمون مرتبطون بحسابك</div>';
     return;
   }
 
-  const canEdit = !_lu || _lu.role === 'superadmin' || _lu.role === 'admin';
-
   el.innerHTML = `<table class="data-table" style="margin-top:.5rem">
-    <thead><tr><th>#</th><th>اسم المستخدم</th><th>كلمة المرور</th><th>الدور</th><th>أُضيف بواسطة</th><th>🔗 ربط بمعلم</th>${canEdit?'<th>إجراءات</th>':''}</tr></thead>
-    <tbody>${visibleUsers.map((u,i)=>{
-      const ri = u._realIdx;
-      const linkedT = u.teacherId ? DB.teachers.find(t=>t.id===u.teacherId) : null;
+    <thead><tr>
+      <th>#</th><th>اسم المستخدم</th><th>كلمة المرور</th>
+      <th>الدور</th><th>أضافه</th><th>🔗 ربط بمعلم</th><th>إجراءات</th>
+    </tr></thead>
+    <tbody>${visible.map((u,n)=>{
+      const ri=u._i;
       return `<tr>
-      <td>${i+1}</td>
-      <td><strong>${u.username}</strong></td>
-      <td>
-        <div style="display:flex;align-items:center;gap:.5rem">
-          <span id="pass-display-${ri}" data-pass="${u.password}" data-visible="0" style="font-family:monospace;letter-spacing:2px;font-size:.88rem">${'•'.repeat(u.password.length)}</span>
-          <button onclick="togglePassView(${ri})"
-            id="pass-eye-${ri}"
-            style="background:transparent;border:1px solid var(--border);border-radius:6px;color:var(--muted);cursor:pointer;padding:.15rem .45rem;font-size:.78rem;transition:all .18s"
-            onmouseenter="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'"
-            onmouseleave="this.style.borderColor='var(--border)';this.style.color='var(--muted)'"
-            title="إظهار / إخفاء كلمة المرور">👁️</button>
-        </div>
-      </td>
-      <td><span class="badge ${u.role==='superadmin'?'badge-a':u.role==='admin'?'badge-p':'badge-l'}" style="font-size:.72rem">${u.role==='superadmin'?'👑 سوبر أدمن':u.role==='admin'?'🔐 أدمن':'👨‍🏫 معلم'}</span></td>
-      <td style="font-size:.75rem;color:var(--muted)">${u.addedBy||'—'}</td>
-      <td>
-        <select onchange="linkUserToTeacher(${ri},this.value)"
-          style="background:var(--bg);border:1px solid var(--border);border-radius:7px;color:var(--text);padding:.25rem .5rem;font-family:'Cairo',sans-serif;font-size:.78rem">
-          <option value="">— بدون ربط —</option>
-          ${DB.teachers.map(t=>`<option value="${t.id}" ${u.teacherId===t.id?'selected':''}>${t.name}</option>`).join('')}
-        </select>
-      </td>
-      ${canEdit?`<td><div class="actions">
-        <button class="btn btn-ghost btn-sm" onclick="editAppUser(${ri})">✏️ تعديل</button>
-        <button class="btn btn-danger btn-sm" onclick="deleteAppUser(${ri})">🗑️</button>
-      </div></td>`:''}
-    </tr>`;
+        <td>${n+1}</td>
+        <td><strong>${u.username}</strong></td>
+        <td>
+          <div style="display:flex;align-items:center;gap:.4rem">
+            <span id="pd-${ri}" data-pass="${u.password}" data-v="0"
+              style="font-family:monospace;font-size:.85rem;letter-spacing:2px">${'•'.repeat(u.password?.length||4)}</span>
+            <button onclick="togglePassView(${ri})" style="background:none;border:1px solid var(--border);border-radius:5px;color:var(--muted);cursor:pointer;padding:.1rem .4rem;font-size:.75rem">👁️</button>
+          </div>
+        </td>
+        <td><span class="badge ${u.role==='superadmin'?'badge-a':u.role==='admin'?'badge-p':'badge-l'}" style="font-size:.72rem">
+          ${u.role==='superadmin'?'👑 سوبر أدمن':u.role==='admin'?'🔐 أدمن':'👨‍🏫 معلم'}
+        </span></td>
+        <td style="font-size:.75rem;color:var(--muted)">${u.addedBy||'—'}</td>
+        <td>
+          <select onchange="linkUserToTeacher(${ri},this.value)"
+            style="background:var(--bg);border:1px solid var(--border);border-radius:7px;color:var(--text);padding:.25rem .5rem;font-family:'Cairo',sans-serif;font-size:.78rem">
+            <option value="">— بدون ربط —</option>
+            ${DB.teachers.map(t=>`<option value="${t.id}" ${u.teacherId===t.id?'selected':''}>${t.name}</option>`).join('')}
+          </select>
+        </td>
+        <td><div class="actions">
+          <button class="btn btn-ghost btn-sm" onclick="editAppUser(${ri})">✏️</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteAppUser(${ri})">🗑️</button>
+        </div></td>
+      </tr>`;
     }).join('')}</tbody>
   </table>`;
 }
 
 function togglePassView(i){
-  const el = document.getElementById('pass-display-'+i);
+  const el = document.getElementById('pd-'+i) || document.getElementById('pass-display-'+i);
   if(!el) return;
   const pass = el.dataset.pass;
-  if(el.dataset.visible === '1'){
+  if(el.dataset.v === '1' || el.dataset.visible === '1'){
     el.textContent = '•'.repeat(pass.length);
-    el.dataset.visible = '0';
+    el.dataset.v = '0'; el.dataset.visible = '0';
   } else {
     el.textContent = pass;
-    el.dataset.visible = '1';
+    el.dataset.v = '1'; el.dataset.visible = '1';
   }
 }
 
