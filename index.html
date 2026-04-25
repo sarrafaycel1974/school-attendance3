@@ -18,28 +18,244 @@
   --l-bg:#2d1f00;--l-border:#5a3e00;
   --dash1:#1a237e;--dash2:#1b5e20;
 }
+/* ── LIGHT THEME ── */
+body.light-theme{
+  --bg:#f0f4f8;--surface:#ffffff;--surface2:#e8edf3;--border:#d0d7e0;
+  --accent:#1a6fd4;--accent2:#1a8a3a;--danger:#d32f2f;--warn:#b86e00;
+  --text:#1a2332;--muted:#5a6a7e;
+  --p-bg:#e8f5ee;--p-border:#7bc8a0;
+  --a-bg:#fde8e8;--a-border:#f4a0a0;
+  --l-bg:#fff8e1;--l-border:#f0c040;
+  --dash1:#1565c0;--dash2:#2e7d32;
+}
+body.light-theme #sidebar{background:#ffffff;border-left-color:rgba(26,111,212,.15)}
+body.light-theme #sidebar-logo{border-bottom-color:rgba(26,111,212,.1)}
+body.light-theme #sidebar-logo .s-icon{background:linear-gradient(135deg,#1a6fd4,#0d47a1)}
+body.light-theme .snav-btn{color:#7a8a9e}
+body.light-theme .snav-btn:hover{background:rgba(26,111,212,.07);color:#1a2332}
+body.light-theme .snav-btn.active{background:rgba(26,111,212,.12);color:#1a6fd4}
+body.light-theme .snav-btn.active::after{background:linear-gradient(180deg,#1a6fd4,#0d47a1)}
+body.light-theme .snav-icon{background:rgba(0,0,0,.04)}
+body.light-theme .snav-btn:hover .snav-icon{background:rgba(26,111,212,.1)}
+body.light-theme .snav-sep{background:rgba(0,0,0,.07)}
+body.light-theme #sidebar-bottom{border-top-color:rgba(0,0,0,.07)}
+body.light-theme #sidebar-user-text div{color:var(--text)!important}
+body.light-theme #sidebar-toggle{background:rgba(0,0,0,.03);border-color:rgba(0,0,0,.1);color:#7a8a9e}
+body.light-theme #sidebar-toggle:hover{background:rgba(26,111,212,.08);color:#1a6fd4;border-color:rgba(26,111,212,.3)}
+body.light-theme #top-nav-bar{background:#ffffff;border-bottom-color:rgba(26,111,212,.12)}
+body.light-theme .tnav-item{color:#7a8a9e}
+body.light-theme .tnav-item:hover{color:#1a2332;border-bottom-color:rgba(26,111,212,.35)}
+body.light-theme .tnav-item.active{color:#1a6fd4;border-bottom-color:#1a6fd4}
+body.light-theme #tnav-sep{background:rgba(0,0,0,.1)}
+body.light-theme .live-dot-wrap{background:#e8f5ee;border-color:#7bc8a0;color:#1a8a3a}
+body.light-theme .live-dot{background:#1a8a3a}
+body.light-theme #app-content::-webkit-scrollbar-thumb{background:rgba(26,111,212,.3)}
+body.light-theme #app-content::-webkit-scrollbar-thumb:hover{background:rgba(26,111,212,.55)}
+body.light-theme .card{background:#fff;border-color:#d0d7e0}
+body.light-theme .data-table th{background:#e8edf3;border-color:#d0d7e0;color:#5a6a7e}
+body.light-theme .data-table td{background:#fff;border-color:#d0d7e0}
+body.light-theme .data-table tr:hover td{background:#f5f8fc}
+body.light-theme input,body.light-theme select,body.light-theme textarea{background:#f8fafc;border-color:#d0d7e0;color:#1a2332}
+body.light-theme .snav-label{color:inherit}
+/* theme toggle btn */
+.theme-icon{font-size:1.1rem;transition:transform .3s}
+#theme-toggle-btn:hover .theme-icon{transform:rotate(20deg)}
+/* theme btn: icon always visible, label follows sidebar hover */
+.theme-btn .snav-icon{
+  background:rgba(88,166,255,.12);
+  border:1px solid rgba(88,166,255,.2);
+}
+body.light-theme .theme-btn .snav-icon{
+  background:rgba(26,111,212,.1);
+  border:1px solid rgba(26,111,212,.2);
+}
+.theme-btn-label{
+  opacity:0;transition:opacity .2s .08s;
+}
+#sidebar:hover .theme-btn-label{
+  opacity:1;
+}
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;direction:rtl}
+body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;direction:rtl;overflow:hidden}
 
-/* ── HEADER ── */
-header{background:linear-gradient(135deg,#0d1117,#161b22);border-bottom:1px solid var(--border);padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;height:62px;position:sticky;top:0;z-index:200}
-.logo{display:flex;align-items:center;gap:.65rem;font-weight:700;font-size:.98rem;color:var(--accent);line-height:1.25}
-.logo-icon{width:38px;height:38px;background:linear-gradient(135deg,var(--accent),#1f6feb);border-radius:9px;display:grid;place-items:center;font-size:1.2rem;flex-shrink:0}
-.logo small{font-size:.7rem;color:var(--muted);font-weight:400;display:block}
-.hdr-right{display:flex;align-items:center;gap:.75rem}
+/* ══ NEW LAYOUT: TOP NAV + RIGHT ICON SIDEBAR ══ */
+#app-shell{display:flex;flex-direction:column;min-height:100vh}
+/* ── SIDEBAR: icon strip, expands on hover ── */
+#sidebar{
+  width:62px;
+  background:#070c16;
+  border-left:1px solid rgba(88,166,255,.12);
+  display:flex;flex-direction:column;align-items:flex-start;
+  position:fixed;top:0;right:0;bottom:0;z-index:300;
+  overflow:hidden;padding:0;
+  transition:width .25s cubic-bezier(.4,0,.2,1),
+             box-shadow .25s cubic-bezier(.4,0,.2,1);
+}
+#sidebar:hover{
+  width:220px;
+  box-shadow:-6px 0 32px rgba(0,0,0,.55);
+}
+/* logo */
+#sidebar-logo{
+  width:220px;display:flex;flex-direction:row;align-items:center;
+  padding:.75rem .85rem;border-bottom:1px solid rgba(88,166,255,.08);
+  gap:.65rem;min-height:62px;
+}
+#sidebar-logo .s-icon{
+  width:38px;height:38px;min-width:38px;
+  background:linear-gradient(135deg,#58a6ff,#1f6feb);
+  border-radius:11px;display:grid;place-items:center;
+  font-size:1.25rem;flex-shrink:0;
+  box-shadow:0 0 20px rgba(88,166,255,.25);
+}
+#sidebar-logo .s-text{
+  overflow:hidden;white-space:nowrap;flex:1;
+  opacity:0;transition:opacity .18s .05s;
+}
+#sidebar:hover #sidebar-logo .s-text{opacity:1}
+#sidebar-logo .s-text b{font-size:.8rem;font-weight:900;color:#e6edf3;display:block}
+#sidebar-logo .s-text small{font-size:.63rem;color:#8b949e}
+/* nav */
+#sidebar-nav-wrap{
+  flex:1;display:flex;flex-direction:column;position:relative;overflow:hidden;width:100%;
+}
+#sidebar-nav{
+  flex:1;overflow-y:auto;overflow-x:hidden;
+  padding:.4rem 0;scrollbar-width:none;
+  width:220px;display:flex;flex-direction:column;gap:2px;
+}
+#sidebar-nav::-webkit-scrollbar{display:none}
+/* scroll arrows */
+.snav-arrow{
+  width:100%;height:28px;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;flex-shrink:0;
+  font-size:.75rem;color:#6e7681;
+  background:linear-gradient(to bottom,#070c16,transparent);
+  border:none;transition:color .15s,opacity .2s;
+  opacity:0;pointer-events:none;z-index:2;
+}
+.snav-arrow.snav-arrow-down{
+  background:linear-gradient(to top,#070c16,transparent);
+}
+.snav-arrow.visible{opacity:1;pointer-events:all}
+.snav-arrow:hover{color:#58a6ff}
+body.light-theme .snav-arrow{background:linear-gradient(to bottom,#fff,transparent);color:#aab}
+body.light-theme .snav-arrow.snav-arrow-down{background:linear-gradient(to top,#fff,transparent)}
+body.light-theme .snav-arrow:hover{color:#1a6fd4}
+.snav-btn{
+  display:flex;flex-direction:row;align-items:center;
+  gap:.65rem;
+  width:204px;min-height:46px;padding:.52rem .85rem;
+  background:transparent;border:none;border-radius:10px;
+  color:#6e7681;font-family:'Cairo',sans-serif;
+  font-size:.82rem;font-weight:700;
+  cursor:pointer;transition:all .15s;position:relative;
+  white-space:nowrap;overflow:hidden;margin:1px 8px;
+}
+.snav-btn:hover{background:rgba(88,166,255,.07);color:#c9d1d9}
+.snav-btn.active{background:rgba(88,166,255,.13);color:#58a6ff}
+.snav-btn.active::after{
+  content:'';position:absolute;right:0;top:15%;bottom:15%;
+  width:3px;background:linear-gradient(180deg,#58a6ff,#1f6feb);
+  border-radius:3px 0 0 3px;
+}
+.snav-icon{
+  width:30px;height:30px;min-width:30px;border-radius:8px;
+  display:grid;place-items:center;font-size:1rem;flex-shrink:0;
+  background:rgba(255,255,255,.04);transition:all .15s;
+}
+.snav-btn:hover .snav-icon{background:rgba(88,166,255,.1)}
+.snav-btn.active .snav-icon{background:rgba(88,166,255,.16);filter:drop-shadow(0 0 5px rgba(88,166,255,.4))}
+.snav-label{
+  overflow:hidden;white-space:nowrap;flex:1;text-align:right;
+  opacity:0;transition:opacity .15s;
+}
+#sidebar:hover .snav-label{opacity:1;transition:opacity .2s .08s}
+.snav-sep{width:calc(100% - 20px);height:1px;background:rgba(255,255,255,.06);margin:.35rem 10px}
+/* bottom */
+#sidebar-bottom{
+  border-top:1px solid rgba(255,255,255,.05);
+  display:flex;flex-direction:column;
+  width:220px;
+  padding:0;
+}
+#sidebar-user-info{
+  display:flex;align-items:center;gap:.6rem;
+  padding:.4rem .85rem;overflow:hidden;
+}
+#sidebar-user-info>div:last-child{
+  overflow:hidden;opacity:0;transition:opacity .15s;flex:1;
+}
+#sidebar:hover #sidebar-user-info>div:last-child{opacity:1;transition:opacity .2s .08s}
+#sidebar:hover #sidebar-user-text{opacity:1!important;transition:opacity .2s .08s!important}
+#sidebar-toggle{
+  width:calc(100% - 16px);margin:0 8px;
+  padding:.42rem .75rem;
+  background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);
+  border-radius:9px;color:#6e7681;cursor:pointer;
+  transition:all .15s;display:flex;align-items:center;gap:.5rem;
+  font-family:'Cairo',sans-serif;font-size:.75rem;font-weight:700;
+}
+#sidebar-toggle:hover{background:rgba(88,166,255,.08);color:#58a6ff;border-color:rgba(88,166,255,.25)}
+#sidebar-toggle .snav-label{opacity:0;transition:opacity .15s}
+#sidebar:hover #sidebar-toggle .snav-label{opacity:1;transition:opacity .2s .08s}
+#global-back-btn{padding:.52rem .85rem;gap:.65rem}
+/* ── TOP NAV BAR ── */
+#top-nav-bar{
+  position:fixed;top:0;right:62px;left:0;height:62px;
+  background:#070c16;border-bottom:1px solid rgba(88,166,255,.1);
+  display:flex;align-items:center;z-index:250;
+  padding:0 1rem;overflow-x:auto;scrollbar-width:none;
+  transition:right .25s cubic-bezier(.4,0,.2,1);
+}
+#sidebar:hover ~ * #top-nav-bar,
+body:has(#sidebar:hover) #top-nav-bar{right:220px}
+#top-nav-bar::-webkit-scrollbar{display:none}
+.tnav-item{
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+  padding:8px 12px;cursor:pointer;
+  border-bottom:2px solid transparent;
+  color:#8b949e;font-size:.7rem;font-weight:700;
+  white-space:nowrap;min-width:68px;
+  font-family:'Cairo',sans-serif;transition:all .15s;
+  background:transparent;border-top:none;border-left:none;border-right:none;
+  flex-shrink:0;height:62px;justify-content:center;
+}
+.tnav-item svg{width:20px;height:20px;flex-shrink:0}
+.tnav-item:hover{color:#c9d1d9;border-bottom-color:rgba(88,166,255,.3)}
+.tnav-item.active{color:#58a6ff;border-bottom-color:#58a6ff}
+#tnav-sep{width:1px;height:32px;background:rgba(255,255,255,.07);margin:0 .4rem;flex-shrink:0}
+/* ── APP CONTENT ── */
+#app-content{
+  margin-right:62px;margin-top:62px;
+  display:flex;flex-direction:column;
+  min-width:0;
+  height:calc(100vh - 62px);
+  overflow-y:auto;
+  overflow-x:hidden;
+  transition:margin-right .25s cubic-bezier(.4,0,.2,1);
+  scrollbar-width:thin;
+  scrollbar-color:rgba(88,166,255,.35) transparent;
+}
+#app-content::-webkit-scrollbar{width:6px}
+#app-content::-webkit-scrollbar-track{background:transparent}
+#app-content::-webkit-scrollbar-thumb{background:rgba(88,166,255,.35);border-radius:999px}
+#app-content::-webkit-scrollbar-thumb:hover{background:rgba(88,166,255,.6)}
+#sidebar.collapsed{width:62px}
+#sidebar.collapsed~#app-content{margin-right:62px}
+
+/* ── HEADER (legacy - hidden) ── */
+header{display:none}
+.hdr-right{display:none}
 .live-dot-wrap{display:flex;align-items:center;gap:.4rem;background:var(--p-bg);border:1px solid var(--p-border);color:var(--accent2);border-radius:20px;padding:.22rem .7rem;font-size:.75rem;font-weight:700}
 .live-dot{width:6px;height:6px;background:var(--accent2);border-radius:50%;animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
 #hdr-clock{font-size:.82rem;color:var(--muted)}
 
-/* ── NAV ── */
-.top-nav{display:flex;background:var(--surface);border-bottom:1px solid var(--border);padding:0 1.5rem;overflow-x:auto;scrollbar-width:none}
-.top-nav::-webkit-scrollbar{display:none}
-.top-nav button{padding:.55rem .75rem;background:transparent;border:none;border-bottom:2px solid transparent;color:var(--muted);font-family:'Cairo',sans-serif;font-size:.78rem;font-weight:700;cursor:pointer;white-space:nowrap;transition:all .2s;display:flex;align-items:center;gap:.3rem}
-.top-nav button:hover{color:var(--text)}
-.top-nav button.active{color:var(--accent);border-bottom-color:var(--accent)}
-
-main{max-width:1180px;margin:0 auto;padding:1.75rem 1.25rem 5rem}
+/* ── TOP-NAV hidden (replaced by sidebar) ── */
+.top-nav{display:none}
+main{width:100%;padding:1.25rem 1.25rem 4rem}
 .page{display:none}.page.active{display:block}
 
 /* ── CARDS ── */
@@ -459,41 +675,176 @@ select option{background:var(--surface)}
   </div>
 </div>
 
-<header>
-  <div class="logo">
-    <div class="logo-icon">🏫</div>
-    <div><span id="hdr-school-name">مدرسة أم القيوين</span> <small>نظام الحضور والغياب v2</small></div>
-  </div>
-  <div style="font-size:.82rem;color:var(--muted);font-weight:700" id="hdr-teacher-name">فيصل عبيدي</div>
-  <span id="hdr-role-badge" style="display:none;padding:.18rem .65rem;border-radius:20px;font-size:.72rem;font-weight:700"></span>
-  <div class="hdr-right">
-    <button onclick="doLogout()"
-      style="padding:.28rem .75rem;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:.75rem;font-weight:700;cursor:pointer;transition:all .18s;display:flex;align-items:center;gap:.3rem"
-      onmouseenter="this.style.borderColor='var(--danger)';this.style.color='var(--danger)'" onmouseleave="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">
-      🚪 <span>تسجيل الخروج</span>
-    </button>
-    <div class="live-dot-wrap"><div class="live-dot"></div><span id="lbl-live">مباشر</span></div>
-    <div id="lang-switcher" style="display:flex;gap:.3rem;align-items:center">
-      <button onclick="setLang('ar')" id="lang-ar" style="padding:.22rem .6rem;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:.72rem;font-weight:700;cursor:pointer;transition:all .18s">ع</button>
-      <button onclick="setLang('fr')" id="lang-fr" style="padding:.22rem .6rem;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:.72rem;font-weight:700;cursor:pointer;transition:all .18s">FR</button>
-      <button onclick="setLang('en')" id="lang-en" style="padding:.22rem .6rem;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:.72rem;font-weight:700;cursor:pointer;transition:all .18s">EN</button>
-    </div>
-    <span id="hdr-clock"></span>
-  </div>
-</header>
+<div id="app-shell">
 
-<div class="top-nav">
-  <button id="global-back-btn" onclick="goBack()" style="display:none;border-left:1px solid var(--border);margin-left:.25rem;color:var(--accent);font-weight:900;background:rgba(88,166,255,.08);border-radius:8px 8px 0 0"><span id="nav-back">⟵ رجوع</span></button>
-  <button class="active" onclick="goPage('page-dashboard',this)" id="nav-btn-dashboard"><span id="nav-dashboard">📊 لوحة التحكم</span></button>
-  <button onclick="goPage('page-teacher',this)" id="nav-btn-teacher"><span id="nav-teacher">📋 تسجيل الحضور</span></button>
-  <button onclick="goPage('page-records',this)" id="nav-btn-records"><span id="nav-records">📁 السجلات</span></button>
-  <button onclick="goPage('page-students',this)" id="nav-btn-students"><span id="nav-students">👤 ملفات الطلاب</span></button>
-  <button onclick="goPage('page-grades',this)" id="nav-btn-grades"><span id="nav-grades">🎯 الدرجات</span></button>
-  <button onclick="goPage('page-schedule',this)" id="nav-btn-schedule"><span id="nav-schedule">📅 جدول الحصص</span></button>
-  <button onclick="goPage('page-analytics',this)" id="nav-btn-analytics"><span id="nav-analytics">📈 إحصائيات</span></button>
-  <button onclick="goPage('page-docs',this)" id="nav-btn-docs"><span id="nav-docs">📂 ملفات المعلم</span></button>
-  <button onclick="requireAdmin('page-admin',this)" id="nav-btn-admin"><span id="nav-admin">⚙️ الإدارة</span></button>
-  <button onclick="goPage('page-owner',this)" id="nav-btn-owner" style="display:none;color:var(--warn)"><span>👑 لوحة المالك</span></button>
+<!-- ══ SIDEBAR ══ -->
+<aside id="sidebar">
+  <div id="sidebar-logo">
+    <div class="s-icon">🏫</div>
+    <div class="s-text">
+      <b id="hdr-school-name">مدرسة أم القيوين</b>
+      <small>نظام الحضور والغياب v2</small>
+    </div>
+  </div>
+
+  <div id="sidebar-nav-wrap">
+  <button class="snav-arrow snav-arrow-up" id="snav-up" onclick="_snavScroll(-1)" title="">▲</button>
+  <nav id="sidebar-nav">
+    <!-- الرجوع -->
+    <button id="global-back-btn" class="snav-btn" onclick="goBack()" style="display:none;color:var(--accent)">
+      <span class="snav-icon">⟵</span>
+      <span class="snav-label" id="nav-back">رجوع</span>
+    </button>
+
+    <button class="snav-btn active" onclick="goPage('page-dashboard',this)" id="nav-btn-dashboard">
+      <span class="snav-icon">📊</span>
+      <span class="snav-label" id="nav-dashboard"><span id="snav-lbl-dashboard">لوحة التحكم</span></span>
+    </button>
+    <button class="snav-btn" onclick="goPage('page-teacher',this)" id="nav-btn-teacher">
+      <span class="snav-icon">📋</span>
+      <span class="snav-label" id="nav-teacher"><span id="snav-lbl-teacher">تسجيل الحضور</span></span>
+    </button>
+    <button class="snav-btn" onclick="goPage('page-records',this)" id="nav-btn-records">
+      <span class="snav-icon">📁</span>
+      <span class="snav-label" id="nav-records"><span id="snav-lbl-records">السجلات</span></span>
+    </button>
+    <button class="snav-btn" onclick="goPage('page-students',this)" id="nav-btn-students">
+      <span class="snav-icon">👤</span>
+      <span class="snav-label" id="nav-students"><span id="snav-lbl-students">ملفات الطلاب</span></span>
+    </button>
+    <button class="snav-btn" onclick="goPage('page-grades',this)" id="nav-btn-grades">
+      <span class="snav-icon">🎯</span>
+      <span class="snav-label" id="nav-grades"><span id="snav-lbl-grades">الدرجات</span></span>
+    </button>
+
+    <div class="snav-sep"></div>
+
+    <button class="snav-btn" onclick="goPage('page-schedule',this)" id="nav-btn-schedule">
+      <span class="snav-icon">📅</span>
+      <span class="snav-label" id="nav-schedule"><span id="snav-lbl-schedule">جدول الحصص</span></span>
+    </button>
+    <button class="snav-btn" onclick="goPage('page-analytics',this)" id="nav-btn-analytics">
+      <span class="snav-icon">📈</span>
+      <span class="snav-label" id="nav-analytics"><span id="snav-lbl-analytics">إحصائيات</span></span>
+    </button>
+    <button class="snav-btn" onclick="goPage('page-docs',this)" id="nav-btn-docs">
+      <span class="snav-icon">📂</span>
+      <span class="snav-label" id="nav-docs"><span id="snav-lbl-docs">ملفات المعلم</span></span>
+    </button>
+    <button class="snav-btn" onclick="goPage('page-meetings',this)" id="nav-btn-meetings">
+      <span class="snav-icon">🎥</span>
+      <span class="snav-label"><span id="snav-lbl-meetings">الاجتماعات</span></span>
+    </button>
+
+    <div class="snav-sep"></div>
+
+    <button class="snav-btn" onclick="requireAdmin('page-admin',this)" id="nav-btn-admin">
+      <span class="snav-icon">⚙️</span>
+      <span class="snav-label" id="nav-admin"><span id="snav-lbl-admin">الإدارة</span></span>
+    </button>
+    <button class="snav-btn" onclick="goPage('page-owner',this)" id="nav-btn-owner" style="display:none">
+      <span class="snav-icon">👑</span>
+      <span class="snav-label" style="color:var(--warn)">لوحة المالك</span>
+    </button>
+
+    <div class="snav-sep"></div>
+
+    <!-- زر تبديل الثيم داخل القائمة -->
+    <button class="snav-btn theme-btn" onclick="toggleTheme()" id="theme-toggle-btn" title="تغيير لون الشاشة">
+      <span class="snav-icon" id="theme-icon" style="font-size:1.1rem">🌙</span>
+      <span class="snav-label theme-btn-label" id="theme-label">تغيير لون الشاشة</span>
+    </button>
+  </nav>
+  <button class="snav-arrow snav-arrow-down" id="snav-down" onclick="_snavScroll(1)" title="">▼</button>
+  </div><!-- /sidebar-nav-wrap -->
+
+  <div id="sidebar-bottom">
+    <!-- معلومات المستخدم -->
+    <div style="display:flex;align-items:center;gap:.6rem;padding:.45rem .85rem;overflow:hidden;width:220px" id="sidebar-user-info">
+      <div style="width:32px;height:32px;min-width:32px;border-radius:50%;background:linear-gradient(135deg,#58a6ff,#3fb950);display:grid;place-items:center;font-size:.78rem;font-weight:900;color:#0d1117;flex-shrink:0" id="sidebar-avatar">A</div>
+      <div style="overflow:hidden;flex:1;opacity:0;transition:opacity .2s .08s" class="snav-label" id="sidebar-user-text">
+        <div style="font-size:.78rem;font-weight:700;color:#e6edf3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" id="hdr-teacher-name">—</div>
+        <div style="font-size:.65rem;color:#8b949e" id="sidebar-role-label">—</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- ══ TOP NAV BAR ══ -->
+<nav id="top-nav-bar">
+  <!-- Logo zone left -->
+  <div style="display:flex;align-items:center;gap:.6rem;margin-left:auto;padding-right:.5rem;flex-shrink:0">
+    <div style="width:34px;height:34px;background:linear-gradient(135deg,#58a6ff,#1f6feb);border-radius:9px;display:grid;place-items:center;font-size:1.1rem;box-shadow:0 0 16px rgba(88,166,255,.25)">🏫</div>
+    <div style="overflow:hidden">
+      <div style="font-size:.78rem;font-weight:900;color:#e6edf3;white-space:nowrap" id="tnav-school-name">مدرسة أم القيوين</div>
+      <div style="font-size:.6rem;color:#8b949e" id="tnav-sub">نظام الحضور والغياب</div>
+    </div>
+  </div>
+  <div id="tnav-sep"></div>
+  <!-- Nav items -->
+  <button class="tnav-item active" onclick="goPage('page-dashboard',null,'dashboard')" id="tnav-btn-dashboard">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+    <span id="tnav-lbl-dashboard">لوحة التحكم</span>
+  </button>
+  <button class="tnav-item" onclick="goPage('page-teacher',null,'teacher')" id="tnav-btn-teacher">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    <span id="tnav-lbl-teacher">تسجيل الحضور</span>
+  </button>
+  <button class="tnav-item" onclick="goPage('page-records',null,'records')" id="tnav-btn-records">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+    <span id="tnav-lbl-records">السجلات</span>
+  </button>
+  <button class="tnav-item" onclick="goPage('page-students',null,'students')" id="tnav-btn-students">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+    <span id="tnav-lbl-students">ملفات الطلاب</span>
+  </button>
+  <button class="tnav-item" onclick="goPage('page-grades',null,'grades')" id="tnav-btn-grades">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+    <span id="tnav-lbl-grades">الدرجات</span>
+  </button>
+  <button class="tnav-item" onclick="goPage('page-schedule',null,'schedule')" id="tnav-btn-schedule">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    <span id="tnav-lbl-schedule">الجدول</span>
+  </button>
+  <button class="tnav-item" onclick="goPage('page-analytics',null,'analytics')" id="tnav-btn-analytics">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+    <span id="tnav-lbl-analytics">إحصائيات</span>
+  </button>
+  <button class="tnav-item" onclick="goPage('page-docs',null,'docs')" id="tnav-btn-docs">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+    <span id="tnav-lbl-docs">الملفات</span>
+  </button>
+  <button class="tnav-item" onclick="goPage('page-meetings',null,'meetings')" id="tnav-btn-meetings" style="color:#3fb950">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+    <span id="tnav-lbl-meetings">اجتماعات</span>
+  </button>
+  <button class="tnav-item" onclick="requireAdmin('page-admin',null,'admin')" id="tnav-btn-admin">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+    <span id="tnav-lbl-admin">الإدارة</span>
+  </button>
+  <!-- Live + clock + lang + logout -->
+  <div style="display:flex;align-items:center;gap:.55rem;margin-right:auto;padding-left:.5rem;flex-shrink:0">
+    <div class="live-dot-wrap"><div class="live-dot"></div><span id="lbl-live">مباشر</span></div>
+    <span id="hdr-clock" style="font-size:.78rem;color:var(--muted)"></span>
+    <div id="lang-switcher" style="display:flex;gap:.25rem;align-items:center">
+      <button onclick="setLang('ar')" id="lang-ar" style="padding:.2rem .5rem;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:.7rem;font-weight:700;cursor:pointer;transition:all .18s">ع</button>
+      <button onclick="setLang('fr')" id="lang-fr" style="padding:.2rem .5rem;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:.7rem;font-weight:700;cursor:pointer;transition:all .18s">FR</button>
+      <button onclick="setLang('en')" id="lang-en" style="padding:.2rem .5rem;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:.7rem;font-weight:700;cursor:pointer;transition:all .18s">EN</button>
+    </div>
+    <button onclick="doLogout()" style="padding:.28rem .85rem;border-radius:20px;border:1px solid var(--danger);background:rgba(248,81,73,.08);color:var(--danger);font-size:.75rem;font-weight:700;cursor:pointer;transition:all .18s;display:flex;align-items:center;gap:.3rem;flex-shrink:0" onmouseenter="this.style.background='var(--danger)';this.style.color='#fff'" onmouseleave="this.style.background='rgba(248,81,73,.08)';this.style.color='var(--danger)'">🚪 <span id="tnav-logout">خروج</span></button>
+  </div>
+</nav>
+
+<!-- ══ APP CONTENT ══ -->
+<div id="app-content">
+
+<!-- old header removed, using top-nav-bar -->
+<span id="hdr-page-title" style="display:none"></span><span id="hdr-role-badge" style="display:none"></span>
+
+<!-- top-nav مخفي (للتوافق مع الكود القديم) -->
+<div class="top-nav" style="display:none">
+  <button id="global-back-btn-hidden"></button>
+  <button class="active" id="nav-btn-dashboard-hidden"></button>
 </div>
 
 <main>
@@ -691,7 +1042,23 @@ select option{background:var(--surface)}
     <div id="add-teacher-form" style="display:none;margin-bottom:1rem;padding:1rem;background:var(--surface2);border-radius:9px;border:1px solid var(--border)">
       <div class="form-row">
         <div class="fg"><label id="lbl-at-name">اسم المدرس</label><input id="at-name" placeholder="الاسم الكامل"></div>
-        <div class="fg"><label id="lbl-at-subject">التخصص / المادة</label><input id="at-subject" placeholder="مثال: رياضيات"></div>
+        <div class="fg"><label id="lbl-at-subject">التخصص / المادة</label>
+          <select id="at-subject">
+            <option value="">— اختر المادة —</option>
+            <option>رياضيات</option>
+            <option>علوم</option>
+            <option>عربي</option>
+            <option>إنجليزية</option>
+            <option>اجتماعيات</option>
+            <option>تربية بدنية</option>
+            <option>دراما</option>
+            <option>موسيقى</option>
+            <option>لغات</option>
+            <option>فيزياء</option>
+            <option>كيمياء</option>
+            <option>فلسفة</option>
+          </select>
+        </div>
       </div>
       <div class="form-row">
         <div class="fg"><label>👤 اسم المستخدم (للدخول)</label><input id="at-username" placeholder="مثال: teacher1" autocomplete="off"></div>
@@ -1161,6 +1528,333 @@ select option{background:var(--surface)}
 </div>
 
 
+<!-- ══ MEETINGS PAGE ══ -->
+<!-- ══ EDIT MEETING MODAL ══ -->
+<div id="edit-meeting-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:700;backdrop-filter:blur(6px);align-items:center;justify-content:center;padding:1rem">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:2rem;width:100%;max-width:520px;max-height:92vh;overflow-y:auto">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">
+      <div style="font-size:1.1rem;font-weight:700">✏️ تعديل الاجتماع</div>
+      <button onclick="closeEditMeeting()" style="background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:8px;padding:.3rem .75rem;cursor:pointer;font-size:1rem;font-family:'Cairo',sans-serif">✕</button>
+    </div>
+    <input type="hidden" id="edit-mt-id">
+    <div class="form-row">
+      <div class="fg">
+        <label>📝 موضوع الاجتماع</label>
+        <input id="edit-mt-title" placeholder="موضوع الاجتماع">
+      </div>
+      <div class="fg">
+        <label>👥 الجمهور</label>
+        <select id="edit-mt-type" onchange="toggleEditMeetingTypeFields()">
+          <option value="all">جميع المعلمين</option>
+          <option value="subject">منسقو مادة</option>
+          <option value="class">معلمو صف</option>
+        </select>
+      </div>
+    </div>
+    <!-- حقل اختيار المادة في التعديل -->
+    <div class="fg" id="edit-mt-subject-wrap" style="display:none">
+      <label>📚 اختر المادة</label>
+      <select id="edit-mt-subject">
+        <option value="">— اختر المادة —</option>
+        <option>رياضيات</option>
+        <option>علوم</option>
+        <option>عربي</option>
+        <option>إنجليزية</option>
+        <option>اجتماعيات</option>
+        <option>تربية بدنية</option>
+        <option>دراما</option>
+        <option>موسيقى</option>
+        <option>لغات</option>
+        <option>فيزياء</option>
+        <option>كيمياء</option>
+        <option>فلسفة</option>
+      </select>
+    </div>
+    <div class="form-row">
+      <div class="fg">
+        <label>📅 التاريخ</label>
+        <input id="edit-mt-date" type="date">
+      </div>
+      <div class="fg">
+        <label>🕐 الوقت</label>
+        <input id="edit-mt-time" type="time">
+      </div>
+      <div class="fg">
+        <label>⏱️ المدة (دقيقة)</label>
+        <input id="edit-mt-duration" type="number" min="15" max="240">
+      </div>
+    </div>
+    <div class="fg">
+      <label>🔔 تذكير قبل الاجتماع</label>
+      <select id="edit-mt-reminder">
+        <option value="0">بدون تذكير</option>
+        <option value="5">5 دقائق</option>
+        <option value="15">15 دقيقة</option>
+        <option value="30">30 دقيقة</option>
+        <option value="60">ساعة</option>
+      </select>
+    </div>
+    <div class="fg" style="margin-bottom:1.25rem">
+      <label>📋 أجندة / وصف</label>
+      <textarea id="edit-mt-desc" rows="3" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:.7rem;font-family:'Cairo',sans-serif;font-size:.88rem;resize:vertical"></textarea>
+    </div>
+    <div style="display:flex;gap:.5rem">
+      <button class="btn btn-primary" style="flex:1;justify-content:center" onclick="saveEditMeeting()">💾 حفظ التعديلات</button>
+      <button class="btn btn-ghost" onclick="closeEditMeeting()">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<div class="page" id="page-meetings">
+
+<!-- ══ MEETINGS CSS ══ -->
+<style>
+.mtg-hero{background:linear-gradient(135deg,var(--surface2) 0%,#0d2137 100%);border:1px solid var(--border);border-radius:16px;padding:1.5rem;margin-bottom:1.25rem;position:relative;overflow:hidden}
+.mtg-hero::before{content:'🎥';position:absolute;right:1.5rem;top:50%;transform:translateY(-50%);font-size:4rem;opacity:.08}
+.mtg-tabs{display:flex;gap:.4rem;background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:.35rem;margin-bottom:1.25rem}
+.mtg-tab{flex:1;padding:.5rem;border-radius:8px;border:none;background:transparent;color:var(--muted);font-family:'Cairo',sans-serif;font-size:.82rem;font-weight:700;cursor:pointer;transition:all .2s;text-align:center}
+.mtg-tab.active{background:var(--accent);color:#0d1117}
+.mtg-card{background:var(--surface2);border:1.5px solid var(--border);border-radius:14px;padding:1.25rem;margin-bottom:.85rem;transition:all .2s;position:relative;overflow:hidden}
+.mtg-card.live{border-color:var(--danger);box-shadow:0 0 0 3px rgba(248,81,73,.12)}
+.mtg-card.upcoming{border-color:var(--accent)}
+.mtg-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;border-radius:14px 0 0 14px}
+.mtg-card.live::before{background:var(--danger)}
+.mtg-card.upcoming::before{background:var(--accent)}
+.mtg-card.past::before{background:var(--muted)}
+.mtg-badge{display:inline-flex;align-items:center;gap:.3rem;border-radius:20px;padding:.15rem .65rem;font-size:.72rem;font-weight:700}
+.mtg-badge.live{background:var(--a-bg);border:1px solid var(--a-border);color:var(--danger)}
+.mtg-badge.upcoming{background:var(--p-bg);border:1px solid var(--p-border);color:var(--accent2)}
+.mtg-badge.past{background:var(--surface2);border:1px solid var(--border);color:var(--muted)}
+.mtg-pulse{width:6px;height:6px;border-radius:50%;background:var(--danger);animation:pulse 1s infinite}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:.5rem}
+.cal-day-header{text-align:center;font-size:.7rem;color:var(--muted);font-weight:700;padding:.3rem 0}
+.cal-day{aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:8px;cursor:pointer;position:relative;font-size:.82rem;font-weight:600;transition:all .2s;border:1.5px solid transparent}
+.cal-day:hover{background:var(--surface2)}
+.cal-day.today{background:var(--accent);color:#0d1117;font-weight:900}
+.cal-day.has-meeting{border-color:var(--accent2)}
+.cal-day.has-live{border-color:var(--danger);background:var(--a-bg)}
+.cal-day.other-month{opacity:.3}
+.cal-dot{width:4px;height:4px;border-radius:50%;background:var(--accent2);position:absolute;bottom:3px}
+.room-sidebar{width:280px;min-width:280px;background:var(--surface2);border-left:1px solid var(--border);display:flex;flex-direction:column;height:75vh}
+.chat-msg{padding:.5rem .75rem;border-radius:10px;margin-bottom:.4rem;max-width:85%;font-size:.82rem;line-height:1.4}
+.chat-msg.me{background:var(--accent);color:#0d1117;align-self:flex-end;border-bottom-right-radius:3px}
+.chat-msg.other{background:var(--surface2);border:1px solid var(--border);align-self:flex-start;border-bottom-left-radius:3px}
+.attendee-row{display:flex;align-items:center;gap:.6rem;padding:.4rem .5rem;border-radius:8px;margin-bottom:.3rem}
+.attendee-row:hover{background:var(--surface2)}
+.attendee-av{width:30px;height:30px;border-radius:50%;background:var(--accent);color:#0d1117;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:900;flex-shrink:0}
+.minutes-area{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:1rem;min-height:120px;font-family:'Cairo',sans-serif;font-size:.85rem;color:var(--text);resize:vertical;width:100%;box-sizing:border-box;line-height:1.7}
+</style>
+
+<!-- ══ LIST VIEW ══ -->
+<div id="meetings-list-view">
+
+  <!-- Hero -->
+  <div class="mtg-hero">
+    <div style="font-size:1.25rem;font-weight:900;margin-bottom:.25rem">🎥 الاجتماعات</div>
+    <div style="font-size:.82rem;color:var(--muted)" id="mtg-hero-stats">جاري التحميل...</div>
+    <div style="margin-top:1rem;display:flex;gap:.5rem;flex-wrap:wrap">
+      <button class="btn btn-success btn-sm" onclick="showCreateMeeting()" id="btn-create-meeting">➕ اجتماع جديد</button>
+      <button class="btn btn-ghost btn-sm" onclick="switchMtgView('cal')">📅 التقويم</button>
+      <button class="btn btn-ghost btn-sm" onclick="switchMtgView('list')" id="btn-list-view" style="display:none">📋 القائمة</button>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="mtg-tabs">
+    <button class="mtg-tab active" id="mtab-upcoming" onclick="filterMeetings('upcoming')">⏰ القادمة</button>
+    <button class="mtg-tab" id="mtab-live" onclick="filterMeetings('live')">🔴 جارية</button>
+    <button class="mtg-tab" id="mtab-past" onclick="filterMeetings('past')">📁 السابقة</button>
+  </div>
+
+  <!-- Calendar View (hidden by default) -->
+  <div id="mtg-cal-view" style="display:none;background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:1.25rem;margin-bottom:1.25rem">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+      <button class="btn btn-ghost btn-sm" onclick="calNav(-1)">◀</button>
+      <div style="font-weight:700;font-size:.95rem" id="cal-month-label">—</div>
+      <button class="btn btn-ghost btn-sm" onclick="calNav(1)">▶</button>
+    </div>
+    <div class="cal-grid" id="cal-headers"></div>
+    <div class="cal-grid" id="cal-days"></div>
+    <div id="cal-day-meetings" style="margin-top:1rem"></div>
+  </div>
+
+  <!-- List -->
+  <div id="meetings-container">
+    <div class="empty"><div class="ei">🎥</div>لا توجد اجتماعات بعد</div>
+  </div>
+</div>
+
+<!-- ══ CREATE VIEW ══ -->
+<div id="meetings-create-view" style="display:none">
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">➕ اجتماع جديد</div>
+      <button class="btn btn-ghost btn-sm" onclick="showMeetingsList()">← رجوع</button>
+    </div>
+    <div class="form-row">
+      <div class="fg">
+        <label>📝 موضوع الاجتماع</label>
+        <input id="mt-title" placeholder="مثال: اجتماع منسقي الرياضيات">
+      </div>
+      <div class="fg">
+        <label>👥 الجمهور</label>
+        <select id="mt-type" onchange="toggleMeetingTypeFields()">
+          <option value="all">جميع المعلمين</option>
+          <option value="subject">منسقو مادة</option>
+          <option value="class">معلمو صف</option>
+        </select>
+      </div>
+    </div>
+    <!-- حقل اختيار المادة — يظهر فقط عند "منسقو مادة" -->
+    <div class="fg" id="mt-subject-wrap" style="display:none">
+      <label>📚 اختر المادة</label>
+      <select id="mt-subject">
+        <option value="">— اختر المادة —</option>
+        <option>رياضيات</option>
+        <option>علوم</option>
+        <option>عربي</option>
+        <option>إنجليزية</option>
+        <option>اجتماعيات</option>
+        <option>تربية بدنية</option>
+        <option>دراما</option>
+        <option>موسيقى</option>
+        <option>لغات</option>
+        <option>فيزياء</option>
+        <option>كيمياء</option>
+        <option>فلسفة</option>
+      </select>
+    </div>
+    <div class="form-row">
+      <div class="fg">
+        <label>📅 التاريخ</label>
+        <input id="mt-date" type="date">
+      </div>
+      <div class="fg">
+        <label>🕐 الوقت</label>
+        <input id="mt-time" type="time">
+      </div>
+      <div class="fg">
+        <label>⏱️ المدة (دقيقة)</label>
+        <input id="mt-duration" type="number" value="60" min="15" max="240">
+      </div>
+    </div>
+    <div class="fg" style="margin-bottom:1rem">
+      <label>📋 أجندة / وصف (اختياري)</label>
+      <textarea id="mt-desc" rows="3" placeholder="موضوعات الاجتماع..." style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:.7rem;font-family:'Cairo',sans-serif;font-size:.88rem;resize:vertical"></textarea>
+    </div>
+    <!-- تذكير -->
+    <div class="fg" style="margin-bottom:1rem">
+      <label>🔔 تذكير قبل الاجتماع</label>
+      <select id="mt-reminder">
+        <option value="0">بدون تذكير</option>
+        <option value="5">5 دقائق</option>
+        <option value="15" selected>15 دقيقة</option>
+        <option value="30">30 دقيقة</option>
+        <option value="60">ساعة</option>
+      </select>
+    </div>
+    <!-- نوع غرفة الاجتماع -->
+    <div class="fg" style="margin-bottom:.75rem">
+      <label>🎥 غرفة الاجتماع</label>
+      <select id="mt-room-type" onchange="toggleRoomTypeFields()">
+        <option value="builtin">🟢 غرفة داخلية (Whereby) — لا تفصل ✅</option>
+        <option value="link">🔗 رابط خارجي (Zoom / Google Meet / Teams)</option>
+      </select>
+    </div>
+    <div id="mt-external-link-wrap" style="display:none;margin-bottom:1.25rem">
+      <label>🔗 رابط الاجتماع الخارجي</label>
+      <input id="mt-external-link" placeholder="https://meet.google.com/xxx  أو  https://zoom.us/j/xxx">
+      <div style="font-size:.75rem;color:var(--muted);margin-top:.3rem">سيُفتح الرابط داخل التطبيق عند الضغط على "دخول"</div>
+    </div>
+    <div style="display:flex;gap:.5rem">
+      <button class="btn btn-success" onclick="createMeeting()">✅ إنشاء الاجتماع</button>
+      <button class="btn btn-ghost" onclick="showMeetingsList()">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ ROOM VIEW ══ -->
+<div id="meetings-room-view" style="display:none">
+  <div class="card" style="padding:0;overflow:hidden">
+    <!-- Header -->
+    <div style="padding:1rem 1.5rem;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);background:var(--surface2);flex-wrap:wrap;gap:.5rem">
+      <div>
+        <div style="font-weight:700;font-size:1rem" id="room-title">—</div>
+        <div style="font-size:.78rem;color:var(--muted)" id="room-info">—</div>
+      </div>
+      <div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap">
+        <div class="mtg-badge live"><div class="mtg-pulse"></div><span id="room-duration-label">مباشر</span></div>
+        <button class="btn btn-ghost btn-sm" onclick="toggleRoomPanel('chat')">💬 الدردشة</button>
+        <button class="btn btn-ghost btn-sm" onclick="toggleRoomPanel('attendees')">👥 الحضور</button>
+        <button class="btn btn-ghost btn-sm" onclick="toggleRoomPanel('minutes')">📝 المحضر</button>
+        <button class="btn btn-danger btn-sm" onclick="leaveMeeting()">🚪 مغادرة</button>
+      </div>
+    </div>
+
+    <!-- Room Body -->
+    <div style="display:flex;height:75vh">
+      <!-- Jitsi -->
+      <div style="flex:1;position:relative;background:#000;min-width:0">
+        <iframe id="jitsi-frame" allow="camera; microphone; fullscreen; display-capture; autoplay; clipboard-write"
+          style="width:100%;height:100%;border:none" src="about:blank"
+          allowfullscreen></iframe>
+        <div id="jitsi-loading" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#0d1117;color:var(--muted)">
+          <div style="font-size:3rem;margin-bottom:1rem">🎥</div>
+          <div style="font-weight:700;margin-bottom:.5rem">جاري تحميل الغرفة...</div>
+          <div style="font-size:.82rem">قد يطلب المتصفح إذن الكاميرا والميكروفون</div>
+        </div>
+      </div>
+
+      <!-- Side Panel -->
+      <div id="room-side-panel" style="display:none" class="room-sidebar">
+        <!-- Chat -->
+        <div id="panel-chat" style="display:flex;flex-direction:column;height:100%">
+          <div style="padding:.75rem 1rem;font-weight:700;font-size:.88rem;border-bottom:1px solid var(--border)">💬 دردشة الاجتماع</div>
+          <div id="chat-messages" style="flex:1;overflow-y:auto;padding:.75rem;display:flex;flex-direction:column;gap:.3rem"></div>
+          <div style="padding:.75rem;border-top:1px solid var(--border);display:flex;gap:.5rem">
+            <input id="chat-input" placeholder="اكتب رسالة..." style="flex:1;font-size:.82rem;padding:.4rem .7rem"
+              onkeydown="if(event.key==='Enter')sendChatMsg()">
+            <button class="btn btn-primary btn-sm" onclick="sendChatMsg()">إرسال</button>
+          </div>
+        </div>
+
+        <!-- Attendees -->
+        <div id="panel-attendees" style="display:none;flex-direction:column;height:100%">
+          <div style="padding:.75rem 1rem;font-weight:700;font-size:.88rem;border-bottom:1px solid var(--border)">👥 قائمة الحضور</div>
+          <div id="attendees-list" style="flex:1;overflow-y:auto;padding:.75rem"></div>
+          <div style="padding:.75rem;border-top:1px solid var(--border)">
+            <button class="btn btn-success btn-sm btn-full" onclick="exportAttendees()">⬇️ تصدير الحضور CSV</button>
+          </div>
+        </div>
+
+        <!-- Minutes -->
+        <div id="panel-minutes" style="display:none;flex-direction:column;height:100%">
+          <div style="padding:.75rem 1rem;font-weight:700;font-size:.88rem;border-bottom:1px solid var(--border)">📝 محضر الاجتماع</div>
+          <div style="flex:1;padding:.75rem;overflow-y:auto">
+            <textarea id="minutes-text" class="minutes-area" placeholder="اكتب ملاحظات وقرارات الاجتماع هنا..."></textarea>
+            <div style="margin-top:.5rem;font-size:.75rem;color:var(--muted)">يُحفظ تلقائياً</div>
+          </div>
+          <div style="padding:.75rem;border-top:1px solid var(--border);display:flex;gap:.4rem">
+            <button class="btn btn-primary btn-sm" onclick="saveMinutes()">💾 حفظ</button>
+            <button class="btn btn-ghost btn-sm" onclick="exportMinutes()">⬇️ تصدير</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Minutes after meeting -->
+  <div class="card" style="margin-top:1rem" id="post-meeting-card">
+    <div class="card-head">
+      <div class="card-title">📝 ملاحظات ما بعد الاجتماع</div>
+    </div>
+    <div id="post-meeting-content" style="color:var(--muted);font-size:.85rem">لم يتم حفظ محضر بعد.</div>
+  </div>
+</div>
+
+</div>
+
+
 <!-- ══ OWNER PANEL PAGE ══ -->
 <div class="page" id="page-owner">
   <div class="card">
@@ -1384,6 +2078,22 @@ function applyLang(){
     b.style.borderColor=l===currentLang?'var(--accent)':'var(--border)';
   });
   const lv=document.getElementById('lbl-live');if(lv)lv.textContent=T('live');
+  // Top nav bar labels
+  const _tn={
+    ar:{dashboard:'لوحة التحكم',teacher:'تسجيل الحضور',records:'السجلات',students:'ملفات الطلاب',grades:'الدرجات',schedule:'الجدول',analytics:'إحصائيات',docs:'الملفات',meetings:'اجتماعات',admin:'الإدارة',logout:'خروج',sub:'نظام الحضور والغياب'},
+    en:{dashboard:'Dashboard',teacher:'Attendance',records:'Records',students:'Students',grades:'Grades',schedule:'Schedule',analytics:'Analytics',docs:'Files',meetings:'Meetings',admin:'Admin',logout:'Logout',sub:'Attendance System'},
+    fr:{dashboard:'Tableau de bord',teacher:'Présences',records:'Historique',students:'Élèves',grades:'Notes',schedule:'Emploi du temps',analytics:'Statistiques',docs:'Fichiers',meetings:'Réunions',admin:'Administration',logout:'Déconnexion',sub:'Système de présence'}
+  };
+  const _tl=_tn[currentLang]||_tn.ar;
+  ['dashboard','teacher','records','students','grades','schedule','analytics','docs','meetings','admin'].forEach(k=>{
+    const el=document.getElementById('tnav-lbl-'+k);if(el)el.textContent=_tl[k];
+  });
+  const _lo=document.getElementById('tnav-logout');if(_lo)_lo.textContent=_tl.logout;
+  const _tsub=document.getElementById('tnav-sub');if(_tsub)_tsub.textContent=_tl.sub;
+  // Sidebar icon labels (same translations)
+  ['dashboard','teacher','records','students','grades','schedule','analytics','docs','meetings','admin'].forEach(k=>{
+    const el=document.getElementById('snav-lbl-'+k);if(el)el.textContent=_tl[k];
+  });
   // Nav
   _s('nav-dashboard',T('nav_dashboard'));_s('nav-teacher',T('nav_attendance'));_s('nav-records',T('nav_records'));
   _s('nav-students',T('nav_students'));_s('nav-grades',T('nav_grades'));_s('nav-schedule',T('nav_schedule'));
@@ -1538,6 +2248,20 @@ function isTeacherClass(tid, classId){
   if(!ids.length) return false; /* بدون صفوف محددة — لا يرى شيئاً */
   return ids.includes(classId);
 }
+
+/* فلترة الطلاب حسب صفوف المدرس */
+function filterStudentsByRole(students){
+  if(!shouldFilterByTeacher()) return students;
+  const allowed = getAllowedClassIds();
+  return students.filter(s=>allowed.includes(s.classId));
+}
+
+/* فلترة الصفوف حسب دور المستخدم */
+function filterClassesByRole(classes){
+  if(!shouldFilterByTeacher()) return classes;
+  const allowed = getAllowedClassIds();
+  return classes.filter(c=>allowed.includes(c.id));
+}
 /* تحديث عرض chips صفوف المدرس في الفورم */
 let _atClassIds = [];
 function renderAtClassChips(){
@@ -1669,6 +2393,91 @@ async function _loadDB(){
 /* ════════════════════════════════════
    HELPERS
 ════════════════════════════════════ */
+
+/* ════════════════════════════════════
+   THEME TOGGLE (dark / light)
+════════════════════════════════════ */
+function toggleTheme(){
+  const isLight = document.body.classList.toggle('light-theme');
+  localStorage.setItem('aj_theme', isLight ? 'light' : 'dark');
+  _applyThemeUI(isLight);
+}
+
+function _applyThemeUI(isLight){
+  const icon  = document.getElementById('theme-icon');
+  const label = document.getElementById('theme-label');
+  const tl = {
+    ar:  { label:'تغيير لون الشاشة' },
+    en:  { label:'Change Screen Color' },
+    fr:  { label:'Couleur de l\'écran' }
+  }[currentLang||'ar'] || { label:'تغيير لون الشاشة' };
+  if(icon)  icon.textContent  = isLight ? '☀️' : '🌙';
+  if(label) label.textContent = tl.label;
+}
+
+function _getAutoTheme(){
+  // check system time: 6am-6pm = light, otherwise dark
+  const h = new Date().getHours();
+  return (h >= 6 && h < 18) ? 'light' : 'dark';
+}
+
+function _loadTheme(){
+  const saved = localStorage.getItem('aj_theme');
+  // if user never chose manually, follow time of day
+  const theme = saved || _getAutoTheme();
+  const isLight = theme === 'light';
+  if(isLight) document.body.classList.add('light-theme');
+  _applyThemeUI(isLight);
+}
+
+// listen to OS dark/light mode changes too
+if(window.matchMedia){
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e=>{
+    // only auto-switch if user hasn't set a preference manually
+    if(!localStorage.getItem('aj_theme')){
+      const isLight = !e.matches;
+      document.body.classList.toggle('light-theme', isLight);
+      _applyThemeUI(isLight);
+    }
+  });
+}
+
+// load on startup
+_loadTheme();
+
+// re-check theme every 5 min in case day/night crosses
+setInterval(()=>{
+  if(!localStorage.getItem('aj_theme')){
+    const isLight = _getAutoTheme() === 'light';
+    document.body.classList.toggle('light-theme', isLight);
+    _applyThemeUI(isLight);
+  }
+}, 5 * 60 * 1000);
+
+
+/* ── sidebar nav scroll arrows ── */
+function _snavUpdateArrows(){
+  const nav = document.getElementById('sidebar-nav');
+  const up  = document.getElementById('snav-up');
+  const dn  = document.getElementById('snav-down');
+  if(!nav||!up||!dn) return;
+  up.classList.toggle('visible', nav.scrollTop > 8);
+  dn.classList.toggle('visible', nav.scrollTop < nav.scrollHeight - nav.clientHeight - 8);
+}
+function _snavScroll(dir){
+  const nav = document.getElementById('sidebar-nav');
+  if(nav) nav.scrollBy({top: dir * 120, behavior:'smooth'});
+}
+document.addEventListener('DOMContentLoaded', ()=>{
+  const nav = document.getElementById('sidebar-nav');
+  if(nav){
+    nav.addEventListener('scroll', _snavUpdateArrows);
+    _snavUpdateArrows();
+    // re-check after page changes
+    setInterval(_snavUpdateArrows, 800);
+  }
+});
+
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
 function clsById(id){return DB.classes.find(c=>c.id===id)}
 function tchById(id){return DB.teachers.find(t=>t.id===id)}
@@ -1731,7 +2540,8 @@ function getPresentCount(stuId){
    NAVIGATION
 ════════════════════════════════════ */
 let pendingAdmin=null;
-function requireAdmin(pageId,btn){
+function requireAdmin(pageId,btn,navKey){
+  document.querySelectorAll(".tnav-item").forEach(b=>b.classList.remove("active"));const _ta=document.getElementById("tnav-btn-admin");if(_ta)_ta.classList.add("active");
   pendingAdmin={pageId,btn};
   document.getElementById('pin-inp').value='';
   document.getElementById('pin-err').style.display='none';
@@ -2804,6 +3614,8 @@ function saveTeacher(){
   _atClassIds=[];
   toggleForm('add-teacher-form');renderTeachersTable();initChoose();
   toast('✅ تم إضافة المدرس وإنشاء حسابه بنجاح','ok');playSound('ok');
+  // مزامنة تلقائية فورية مع السحابة
+  _autoSyncToCloud();
 }
 
 function deleteTeacher(id){
@@ -2813,6 +3625,8 @@ function deleteTeacher(id){
   const users=getAppUsers().filter(u=>u.teacherId!==id);
   saveAppUsers(users);
   renderTeachersTable();initChoose();toast(T('teacher_deleted'),'inf');
+  // مزامنة تلقائية
+  _autoSyncToCloud();
 }
 
 function renderTeachersTable(){
@@ -2872,6 +3686,7 @@ function saveClass(){
   DB.classes.push({id:uid(),name,stage:document.getElementById('ac-stage').value});
   persist();document.getElementById('ac-name').value='';
   toggleForm('add-class-form');renderClassesTable();populateClassSelects();toast(T('class_added'),'ok');
+  _autoSyncToCloud();
 }
 
 function deleteClass(id){
@@ -2880,6 +3695,7 @@ function deleteClass(id){
   DB.classes=DB.classes.filter(c=>c.id!==id);
   DB.students=DB.students.filter(s=>s.classId!==id);
   persist();renderClassesTable();renderStudentsTable();populateClassSelects();toast(T('class_deleted'),'inf');
+  _autoSyncToCloud();
 }
 
 function renderClassesTable(){
@@ -2904,12 +3720,14 @@ function saveStudent(){
   persist();document.getElementById('as-name').value='';document.getElementById('as-num').value='';
   const flt=document.getElementById('filter-class-students');if(flt)flt.value=cid;
   toggleForm('add-student-form');renderStudentsTable();toast(T('student_added'),'ok');
+  _autoSyncToCloud();
 }
 
 function deleteStudent(id){
   if(!confirm(T('student_confirm')))return;
   DB.students=DB.students.filter(s=>s.id!==id);
   persist();renderStudentsTable();toast(T('student_deleted'),'inf');
+  _autoSyncToCloud();
 }
 
 function saveBulkStudents(){
@@ -2923,6 +3741,7 @@ function saveBulkStudents(){
   const flt=document.getElementById('filter-class-students');if(flt)flt.value=cid;
   toggleForm('bulk-paste-form');renderStudentsTable();
   toast(T('bulk_added')+' '+names.length+' '+T('students_lbl'),'ok');playSound('ok');
+  _autoSyncToCloud();
 }
 
 function renderStudentsTable(){
@@ -2970,13 +3789,31 @@ function showGradesSetup(){
   const ts=document.getElementById('gr-teacher');
   ts.innerHTML=`<option value="">${T('choose_lbl')}</option>`;
   const linkedT=getLinkedTeacher();
+  const u=getLoggedUser();
+
+  /* ── حماية: معلم بدون ربط لا يدخل ── */
+  if(shouldFilterByTeacher() && !linkedT){
+    document.getElementById('grades-step-landing').style.display='block';
+    document.getElementById('grades-step-setup').style.display='none';
+    toast('⚠️ حسابك غير مرتبط بمدرس — تواصل مع الإدارة','err');
+    return;
+  }
+
   if(shouldFilterByTeacher() && linkedT){
+    const allowedClasses = DB.classes.filter(c=>isTeacherClass(linkedT.id,c.id));
+    /* معلم بدون صفوف مسندة */
+    if(!allowedClasses.length){
+      document.getElementById('grades-step-landing').style.display='block';
+      document.getElementById('grades-step-setup').style.display='none';
+      toast('⚠️ لم يتم إسناد أي صف لك — تواصل مع الإدارة','err');
+      return;
+    }
     const o=document.createElement('option');o.value=linkedT.id;o.textContent=linkedT.name+(linkedT.subject?' — '+linkedT.subject:'');ts.appendChild(o);
     ts.value=linkedT.id; ts.disabled=true;
-    /* تحميل صفوف المعلم تلقائياً */
+    /* تحميل صفوف المعلم فقط */
     const cs=document.getElementById('gr-class');
     cs.innerHTML=`<option value="">${T('choose_lbl')}</option>`;
-    DB.classes.filter(c=>isTeacherClass(linkedT.id,c.id)).forEach(c=>{const o=document.createElement('option');o.value=c.id;o.textContent=c.name;cs.appendChild(o)});
+    allowedClasses.forEach(c=>{const o=document.createElement('option');o.value=c.id;o.textContent=c.name;cs.appendChild(o)});
     cs.disabled=false;
   } else {
     DB.teachers.forEach(t=>{const o=document.createElement('option');o.value=t.id;o.textContent=t.name+(t.subject?' — '+t.subject:'');ts.appendChild(o)});
@@ -3146,8 +3983,17 @@ function grTeacherChange(){
   const cs=document.getElementById('gr-class');
   cs.innerHTML=`<option value="">${T('choose_lbl')}</option>`;cs.disabled=true;
   const tid=document.getElementById('gr-teacher').value;if(!tid)return;
+  /* حماية: المعلم لا يقدر يغير المدرس ليرى صفوف غيره */
+  if(shouldFilterByTeacher()){
+    const linkedT=getLinkedTeacher();
+    if(!linkedT||linkedT.id!==tid){
+      toast('⚠️ غير مسموح','err');
+      document.getElementById('gr-teacher').value='';
+      return;
+    }
+  }
   DB.classes.filter(c=>isTeacherClass(tid,c.id)).forEach(c=>{const o=document.createElement('option');o.value=c.id;o.textContent=c.name;cs.appendChild(o)});
-  cs.disabled=false;
+  if(cs.options.length>1) cs.disabled=false;
 }
 
 function resetExamCols(){
@@ -3187,6 +4033,13 @@ function startGrades(){
   if(!tid)return toast(T('sel_teacher_required'),'err');
   if(!cid)return toast(T('sel_class_required'),'err');
   if(!subject)return toast(T('sub_required'),'err');
+  /* ── حماية أمنية نهائية ── */
+  if(shouldFilterByTeacher()){
+    const linkedT=getLinkedTeacher();
+    if(!linkedT) return toast('⚠️ حسابك غير مرتبط بمدرس','err');
+    if(linkedT.id!==tid) return toast('⚠️ غير مسموح لك بالوصول لهذا المدرس','err');
+    if(!isTeacherClass(tid,cid)) return toast('⚠️ هذا الصف غير مسند إليك','err');
+  }
   const stus=stusInClass(cid);
   if(!stus.length)return toast(T('no_students_class'),'err');
   const tch=tchById(tid),cls=clsById(cid);
@@ -3544,7 +4397,16 @@ function buildGradeHTML(session, students){
 ════════════════════════════════════ */
 let navHistory = [];
 
-function goPage(id, btn) {
+function goPage(id, btn, navKey) {
+  // sync top nav bar active state
+  document.querySelectorAll('.tnav-item').forEach(b=>b.classList.remove('active'));
+  const _nk = navKey || id.replace('page-','');
+  const _tb = document.getElementById('tnav-btn-'+_nk);
+  if(_tb) _tb.classList.add('active');
+  // sync sidebar icons
+  document.querySelectorAll('#sidebar-nav .snav-btn').forEach(b=>b.classList.remove('active'));
+  const _sb = document.getElementById('nav-btn-'+_nk);
+  if(_sb) _sb.classList.add('active');
   const cur = document.querySelector('.page.active');
   if (cur && cur.id !== id) navHistory.push(cur.id);
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -3556,6 +4418,7 @@ function goPage(id, btn) {
     navBtns.forEach(b => { if (b.getAttribute('onclick') && b.getAttribute('onclick').includes(id)) b.classList.add('active'); });
   }
   if (id === 'page-owner') setTimeout(ownerRefresh, 100);
+  if (id === 'page-meetings') { loadMeetingsFromCloud().then(()=>showMeetingsList()); }
   updateGlobalBackBtn();
   if (id === 'page-dashboard') renderDashboard();
   else if (id === 'page-records') { populateRecFilters(); renderRecords(); }
@@ -3665,7 +4528,7 @@ async function _autoSyncOnStart(){
       }, 500);
     }
   }catch(e){
-    console.warn('auto-sync error:', e.name, e.message);
+    // صامت — خطأ في المزامنة التلقائية عند البدء
   }
 }
 
@@ -3679,10 +4542,10 @@ async function _autoSyncOnStart(){
   try{ await _loadDB(); }catch(e){ console.error('فشل تحميل IndexedDB',e); }
 
   /* تحميل المستخدمين من IDB + السحابة (مزامنة كلمات المرور) */
-  try{ await _loadAppUsers(); }catch(e){ console.warn("فشل تحميل المستخدمين",e); }
+  try{ await _loadAppUsers(); }catch(e){}
 
   /* ── مزامنة تلقائية عند الفتح: اسحب من السحابة إذا كانت أحدث ── */
-  try{ await _autoSyncOnStart(); }catch(e){ console.warn('auto-sync:',e); }
+  try{ await _autoSyncOnStart(); }catch(e){}
 
   loadOverlay.remove();
 
@@ -3702,10 +4565,12 @@ function _restoreLoginSession(){
     if(sess){
       const u = JSON.parse(sess);
       document.getElementById('login-screen').style.display = 'none';
+  document.querySelectorAll('.tnav-item').forEach(b=>b.classList.remove('active'));const _ld=document.getElementById('tnav-btn-dashboard');if(_ld)_ld.classList.add('active');
       document.getElementById('hdr-teacher-name').textContent = u.username;
       _updateRoleBadge(u.role);
       const adminBtn = document.getElementById('nav-btn-admin');
       if(adminBtn) adminBtn.style.display = (u.role === 'admin' || u.role === 'superadmin') ? '' : 'none';
+      updateSidebarUser(u.username, u.role);
       const ownerBtn2 = document.getElementById('nav-btn-owner');
       if (ownerBtn2) ownerBtn2.style.display = u.role === 'superadmin' ? '' : 'none';
     }
@@ -4632,7 +5497,67 @@ document.addEventListener('keydown', e=>{
    SUPABASE CLOUD SYNC (constants moved to top of script)
 ════════════════════════════════ */
 
+/* ══════════════════════════════════════
+   مزامنة تلقائية صامتة عند أي تغيير
+══════════════════════════════════════ */
+let _autoSyncTimer = null;
+async function _autoSyncToCloud() {
+  clearTimeout(_autoSyncTimer);
+  _autoSyncTimer = setTimeout(async () => {
+    try {
+      await fetch(GS_URL + '/rest/v1/school_data', {
+        method: 'POST',
+        headers: {...GS_H, 'Prefer': 'resolution=merge-duplicates,return=minimal'},
+        body: JSON.stringify([
+          {key: 'teachers',  value: DB.teachers},
+          {key: 'classes',   value: DB.classes},
+          {key: 'students',  value: DB.students},
+          {key: 'grades',    value: DB.gradeRecords || []},
+          {key: 'settings',  value: DB.settings},
+          {key: 'notes',     value: DB.notes || {}},
+          {key: 'app_users', value: getAppUsers()},
+        ])
+      });
+      gsSetLast();
+      toast('☁️ تمت المزامنة التلقائية', 'ok');
+    } catch(e) {
+      // صامت — البيانات محفوظة محلياً
+    }
+  }, 1000);
+}
 
+/* سحب تلقائي عند فتح التطبيق (بعد تسجيل الدخول) */
+async function _autoPullOnLogin() {
+  try {
+    const dr = await fetch(GS_URL + '/rest/v1/school_data', {
+      headers: {apikey: GS_KEY, 'Authorization': 'Bearer ' + GS_KEY}
+    });
+    if (!dr.ok) return;
+    const items = await dr.json();
+    let changed = false;
+    items.forEach(it => {
+      if (it.key === 'teachers' && it.value?.length) { DB.teachers = it.value; changed = true; }
+      if (it.key === 'classes'  && it.value?.length) { DB.classes  = it.value; changed = true; }
+      if (it.key === 'students' && it.value?.length) { DB.students = it.value; changed = true; }
+      if (it.key === 'grades'   && it.value?.length) { DB.gradeRecords = it.value; changed = true; }
+      if (it.key === 'settings' && it.value)         { DB.settings = it.value; changed = true; }
+      if (it.key === 'notes'    && it.value)         { DB.notes    = it.value; changed = true; }
+      if (it.key === 'app_users' && it.value?.length) {
+        window._cachedAppUsers = it.value;
+        _idbSet(USERS_IDB_KEY, it.value);
+      }
+    });
+    if (changed) {
+      persist();
+      if (typeof renderAdmin === 'function') renderAdmin();
+      if (typeof renderDashboard === 'function') renderDashboard();
+      if (typeof initChoose === 'function') initChoose();
+      toast('☁️ تم تحديث البيانات من السحابة', 'ok');
+    }
+  } catch(e) {
+    // صامت — خطأ في السحب التلقائي
+  }
+}
 
 function gsSetStatus(state){
   const dot=document.getElementById('gs-dot');
@@ -4876,8 +5801,14 @@ function _loginSuccess(found) {
   _updateRoleBadge(found.role);
   const adminBtn = document.getElementById('nav-btn-admin');
   if (adminBtn) adminBtn.style.display = (found.role === 'admin' || found.role === 'superadmin') ? '' : 'none';
+  updateSidebarUser(found.username, found.role);
   const ownerBtn = document.getElementById('nav-btn-owner');
   if (ownerBtn) ownerBtn.style.display = found.role === 'superadmin' ? '' : 'none';
+  // زر إنشاء اجتماع للأدمن فقط
+  const createMtgBtn = document.getElementById('btn-create-meeting');
+  if (createMtgBtn) createMtgBtn.style.display = (found.role==='admin'||found.role==='superadmin') ? '' : 'none';
+  // سحب تلقائي من السحابة بعد الدخول
+  setTimeout(() => _autoPullOnLogin(), 800);
 }
 
 async function doAppLogin() {
@@ -4977,7 +5908,12 @@ function getLinkedTeacher(){
     const t = DB.teachers.find(t=>t.id===u.teacherId);
     if(t) return t;
   }
-  return null;
+  // محاولة ربط بالاسم إذا لم يكن هناك teacherId
+  if(u.username){
+    const t = DB.teachers.find(t=>t.username===u.username||t.name===u.username);
+    if(t) return t;
+  }
+  return null; // معلم بدون ربط — لا يرى أي صفوف
 }
 
 /* هل يجب فلترة سجلات هذا المعلم؟
@@ -4987,6 +5923,16 @@ function shouldFilterByTeacher(){
   /* سوبر أدمن وأدمن يرون الكل */
   if(!u || u.role==='admin' || u.role==='superadmin') return false;
   return true; /* معلم عادي يرى فقط ما يخصه */
+}
+
+/* الصفوف المسموح بها للمستخدم الحالي */
+function getAllowedClassIds(){
+  const u = getLoggedUser();
+  if(!u) return [];
+  if(u.role==='admin' || u.role==='superadmin') return DB.classes.map(c=>c.id);
+  const t = getLinkedTeacher();
+  if(!t) return []; // معلم بدون ربط = لا يرى شيئاً
+  return getTeacherClassIds(t.id);
 }
 
 // إضافة قسم إدارة المستخدمين في لوحة الإدارة
@@ -6131,6 +7077,645 @@ function exportActivityLog(){
   toast('📊 تم تصدير السجل','ok');
 }
 
+
+// ══════════════════════════════════════════════
+// 🎥 MEETINGS SYSTEM
+// ══════════════════════════════════════════════
+// ══════════════════════════════════════════════
+// 🎥 WHEREBY CONFIG
+// ══════════════════════════════════════════════
+const WHEREBY_ROOM_URL = 'https://faycel.whereby.com/school75224702-80dd-47bb-b966-c498e64b4169';
+const WHEREBY_ROOM_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJtZWV0aW5nSWQiOiIxMjg0NzU1MDciLCJyb29tUmVmZXJlbmNlIjp7InJvb21OYW1lIjoiL3NjaG9vbDc1MjI0NzAyLTgwZGQtNDdiYi1iOTY2LWM0OThlNjRiNDE2OSIsIm9yZ2FuaXphdGlvbklkIjoiMzM5MjQ4In0sImlzcyI6Imh0dHBzOi8vYWNjb3VudHMuc3J2LndoZXJlYnkuY29tIiwiaWF0IjoxNzc3MTEyNjUzLCJyb29tS2V5VHlwZSI6Im1lZXRpbmdIb3N0In0.yc96ZL-RbRVrsT0wTzcex1OOarUOybmemrHR9lAB96c';
+
+async function createOrGetDailyRoom(meeting) {
+  // Whereby — غرفة دائمة لا تُحذف ولا تفصل
+  const u = getLoggedUser();
+  const isHost = u && (u.role === 'admin' || u.role === 'superadmin');
+  // المدير يدخل كـ Host بصلاحيات كاملة، المعلمون كضيوف
+  const url = isHost
+    ? WHEREBY_ROOM_URL + '?roomKey=' + WHEREBY_ROOM_KEY + '&embed&skipMediaPermissionPrompt&minimal&chat=on&screenshare=on&background=off&displayName=' + encodeURIComponent(u?.username || 'مضيف')
+    : WHEREBY_ROOM_URL + '?embed&skipMediaPermissionPrompt&minimal&chat=on&screenshare=on&background=off&displayName=' + encodeURIComponent(u?.username || 'مشارك');
+  return url;
+}
+
+const MEETINGS_KEY = 'aj_meetings';
+const CHAT_KEY     = 'aj_chat_';
+const MINUTES_KEY  = 'aj_minutes_';
+let _meetingsFilter = 'upcoming';
+let _currentMeeting = null;
+let _roomTimer = null;
+let _reminderTimers = [];
+let _calDate = new Date();
+let _activePanelId = null;
+let _chatMsgs = [];
+
+function getMeetings(){ try{ return JSON.parse(localStorage.getItem(MEETINGS_KEY)||'[]'); }catch(e){ return []; } }
+function saveMeetings(arr){ localStorage.setItem(MEETINGS_KEY, JSON.stringify(arr)); cloudSaveMeetings(arr); }
+async function cloudSaveMeetings(arr){
+  try{
+    await fetch(GS_URL+'/rest/v1/school_data',{method:'POST',headers:GS_H,
+      body:JSON.stringify({key:'meetings',value:arr})});
+  }catch(e){}
+}
+
+/* ── Views ── */
+function showMeetingsList(){
+  document.getElementById('meetings-list-view').style.display='';
+  document.getElementById('meetings-create-view').style.display='none';
+  document.getElementById('meetings-room-view').style.display='none';
+  updateMtgHero();
+  renderMeetings();
+  scheduleReminders();
+}
+function showCreateMeeting(){
+  document.getElementById('meetings-list-view').style.display='none';
+  document.getElementById('meetings-create-view').style.display='';
+  document.getElementById('meetings-room-view').style.display='none';
+  const today=new Date().toISOString().slice(0,10);
+  document.getElementById('mt-date').value=today;
+  const now=new Date(); now.setMinutes(now.getMinutes()+30);
+  document.getElementById('mt-time').value=now.toTimeString().slice(0,5);
+  const u=getLoggedUser();
+  const canCreate=u&&(u.role==='admin'||u.role==='superadmin');
+  const btn=document.getElementById('btn-create-meeting');
+  if(btn) btn.style.display=canCreate?'':'none';
+}
+function switchMtgView(v){
+  const cal=document.getElementById('mtg-cal-view');
+  const listBtn=document.getElementById('btn-list-view');
+  if(v==='cal'){
+    cal.style.display=''; listBtn.style.display='';
+    renderCalendar();
+  } else {
+    cal.style.display='none'; listBtn.style.display='none';
+  }
+}
+
+/* ── Hero stats ── */
+function updateMtgHero(){
+  const all=getMeetings(); const now=new Date();
+  const live=all.filter(m=>{ const s=new Date(m.datetime),e=new Date(s.getTime()+(m.duration||60)*60000); return s<=now&&e>=now; });
+  const upcoming=all.filter(m=>new Date(m.datetime)>now);
+  const el=document.getElementById('mtg-hero-stats');
+  if(el) el.textContent=`${live.length} جارية الآن · ${upcoming.length} قادمة · ${all.length} إجمالي`;
+}
+
+/* ── Tabs ── */
+function filterMeetings(tab){
+  _meetingsFilter=tab;
+  ['upcoming','live','past'].forEach(t=>{
+    const b=document.getElementById('mtab-'+t);
+    if(b){ b.className='mtg-tab'+(t===tab?' active':''); }
+  });
+  renderMeetings();
+}
+
+/* ── Render list ── */
+function renderMeetings(){
+  const con=document.getElementById('meetings-container');
+  if(!con) return;
+  const all=getMeetings(); const now=new Date();
+  const filtered=all.filter(m=>{
+    const s=new Date(m.datetime),e=new Date(s.getTime()+(m.duration||60)*60000);
+    if(_meetingsFilter==='live') return s<=now&&e>=now;
+    if(_meetingsFilter==='upcoming') return s>now;
+    if(_meetingsFilter==='past') return e<now;
+    return true;
+  }).sort((a,b)=>_meetingsFilter==='past'
+    ?new Date(b.datetime)-new Date(a.datetime)
+    :new Date(a.datetime)-new Date(b.datetime));
+
+  if(!filtered.length){
+    const labels={upcoming:'لا توجد اجتماعات قادمة',live:'لا توجد اجتماعات جارية الآن',past:'لا توجد اجتماعات سابقة'};
+    con.innerHTML=`<div class="empty"><div class="ei">🎥</div>${labels[_meetingsFilter]||'لا توجد اجتماعات'}</div>`;
+    return;
+  }
+  const u=getLoggedUser();
+  const canAdmin=u&&(u.role==='admin'||u.role==='superadmin');
+  con.innerHTML=filtered.map(m=>{
+    const s=new Date(m.datetime),e=new Date(s.getTime()+(m.duration||60)*60000);
+    const isLive=s<=now&&e>=now, isPast=e<now;
+    const dateStr=s.toLocaleDateString('ar-SA-u-nu-latn',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+    const timeStr=s.toLocaleTimeString('ar-SA-u-nu-latn',{hour:'2-digit',minute:'2-digit'});
+    const statusClass=isLive?'live':isPast?'past':'upcoming';
+    const badge=isLive
+      ?`<span class="mtg-badge live"><span class="mtg-pulse"></span>مباشر الآن</span>`
+      :isPast
+      ?`<span class="mtg-badge past">منتهي</span>`
+      :`<span class="mtg-badge upcoming">قادم</span>`;
+    // countdown for upcoming
+    let countdown='';
+    if(!isLive&&!isPast){
+      const diff=s-now;
+      const hh=Math.floor(diff/3600000),mm=Math.floor((diff%3600000)/60000);
+      countdown=`<div style="font-size:.75rem;color:var(--accent);margin-top:.3rem">⏳ يبدأ خلال ${hh>0?hh+' ساعة و':''}${mm} دقيقة</div>`;
+    }
+    const minutes=localStorage.getItem(MINUTES_KEY+m.id);
+    const hasMinutes=minutes&&minutes.trim().length>0;
+    return `<div class="mtg-card ${statusClass}">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;flex-wrap:wrap">
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.4rem;flex-wrap:wrap">
+            <span style="font-weight:700;font-size:1rem">${m.title}</span>
+            ${badge}
+          </div>
+          <div style="font-size:.82rem;color:var(--muted);margin-bottom:.2rem">📅 ${dateStr} — 🕐 ${timeStr} (${m.duration||60} دق)</div>
+          ${m.type==='subject'&&m.subject?`<div style="font-size:.78rem;margin-top:.2rem"><span style="background:rgba(88,166,255,.12);color:var(--accent);border-radius:6px;padding:.15rem .5rem;font-weight:700">📚 منسقو ${m.subject}</span></div>`:''}
+          ${m.type==='all'?`<div style="font-size:.78rem;margin-top:.2rem"><span style="background:rgba(63,185,80,.1);color:var(--accent2);border-radius:6px;padding:.15rem .5rem;font-weight:700">👥 جميع المعلمين</span></div>`:''}
+          ${m.type==='class'?`<div style="font-size:.78rem;margin-top:.2rem"><span style="background:rgba(227,179,65,.1);color:var(--warn);border-radius:6px;padding:.15rem .5rem;font-weight:700">🏫 معلمو الصف</span></div>`:''}
+          ${m.desc?`<div style="font-size:.79rem;color:var(--muted);margin-top:.3rem;padding:.4rem .6rem;background:var(--surface2);border-radius:6px;border-right:3px solid var(--accent)">📋 ${m.desc}</div>`:''}
+          ${countdown}
+          ${hasMinutes?`<div style="font-size:.75rem;color:var(--accent2);margin-top:.4rem">📝 يوجد محضر محفوظ</div>`:''}
+          <div style="font-size:.75rem;color:var(--muted);margin-top:.3rem">👤 ${m.createdBy||'—'}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:.4rem;align-items:flex-end">
+          ${!isPast?`<button class="btn btn-success btn-sm" onclick="joinMeeting('${m.id}')">${isLive?'🔴 دخول المباشر':'🎥 دخول'}</button>`
+                   :`<button class="btn btn-ghost btn-sm" onclick="viewMinutes('${m.id}')">📝 المحضر</button>`}
+          ${canAdmin?`<button class="btn btn-warn btn-sm" onclick="openEditMeeting('${m.id}')">✏️ تعديل</button>`:''}
+          ${canAdmin?`<button class="btn btn-danger btn-sm" onclick="deleteMeeting('${m.id}')">🗑️</button>`:''}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ── Create ── */
+function toggleRoomTypeFields(){
+  const t=document.getElementById('mt-room-type')?.value;
+  const wrap=document.getElementById('mt-external-link-wrap');
+  if(wrap) wrap.style.display=t==='link'?'':'none';
+}
+
+function toggleMeetingTypeFields(){
+  const t=document.getElementById('mt-type')?.value;
+  const wrap=document.getElementById('mt-subject-wrap');
+  if(wrap) wrap.style.display=t==='subject'?'':'none';
+}
+
+function toggleEditMeetingTypeFields(){
+  const t=document.getElementById('edit-mt-type')?.value;
+  const wrap=document.getElementById('edit-mt-subject-wrap');
+  if(wrap) wrap.style.display=t==='subject'?'':'none';
+}
+function createMeeting(){
+  const title=document.getElementById('mt-title').value.trim();
+  const date=document.getElementById('mt-date').value;
+  const time=document.getElementById('mt-time').value;
+  const duration=parseInt(document.getElementById('mt-duration').value)||60;
+  const desc=document.getElementById('mt-desc').value.trim();
+  const type=document.getElementById('mt-type').value;
+  const subject=type==='subject'?(document.getElementById('mt-subject')?.value||''):'';
+  const reminder=parseInt(document.getElementById('mt-reminder').value)||0;
+  const roomType=document.getElementById('mt-room-type')?.value||'builtin';
+  const externalLink=document.getElementById('mt-external-link')?.value.trim()||'';
+  if(!title) return toast('⚠️ أدخل موضوع الاجتماع','err');
+  if(!date)  return toast('⚠️ اختر التاريخ','err');
+  if(!time)  return toast('⚠️ اختر الوقت','err');
+  if(type==='subject'&&!subject) return toast('⚠️ اختر المادة','err');
+  if(roomType==='link'&&!externalLink) return toast('⚠️ أدخل رابط الاجتماع الخارجي','err');
+  const u=getLoggedUser();
+  const meeting={
+    id:'mtg_'+Date.now(), title, desc, type, subject, duration, reminder,
+    datetime:date+'T'+time,
+    roomType, externalLink,
+    roomName:'SchoolMtg_'+Math.random().toString(36).slice(2,8).toUpperCase(),
+    createdBy:u?.username||'admin',
+    createdAt:new Date().toISOString()
+  };
+  const meetings=getMeetings();
+  meetings.push(meeting);
+  saveMeetings(meetings);
+  toast('✅ تم إنشاء الاجتماع','ok');
+  playSound('ok');
+  scheduleReminders();
+  showMeetingsList();
+}
+
+/* ── Join ── */
+function joinMeeting(id){
+  const m=getMeetings().find(x=>x.id===id);
+  if(!m) return toast('⚠️ الاجتماع غير موجود','err');
+  _currentMeeting=m;
+  _chatMsgs=[];
+  _attendees=[];
+  document.getElementById('meetings-list-view').style.display='none';
+  document.getElementById('meetings-create-view').style.display='none';
+  document.getElementById('meetings-room-view').style.display='';
+  document.getElementById('room-title').textContent=m.title;
+  const s=new Date(m.datetime);
+  document.getElementById('room-info').textContent=
+    s.toLocaleDateString('ar-SA-u-nu-latn',{weekday:'long',month:'long',day:'numeric'})+' — '+
+    s.toLocaleTimeString('ar-SA-u-nu-latn',{hour:'2-digit',minute:'2-digit'});
+  const u=getLoggedUser();
+  const displayName=encodeURIComponent(u?.username||'مشارك');
+
+  const frame=document.getElementById('jitsi-frame');
+  const loading=document.getElementById('jitsi-loading');
+
+  // تحديد الرابط حسب نوع الغرفة
+  if(m.roomType==='link' && m.externalLink){
+    // رابط خارجي (Zoom / Google Meet) — يُفتح داخل iframe
+    frame.src=m.externalLink;
+    if(loading){
+      loading.innerHTML=`<div style="text-align:center;padding:2rem">
+        <div style="font-size:3rem;margin-bottom:1rem">🔗</div>
+        <div style="font-weight:700;margin-bottom:.75rem">جاري فتح رابط الاجتماع...</div>
+        <div style="font-size:.82rem;color:var(--muted);margin-bottom:1rem">إذا لم يُفتح تلقائياً، افتحه يدوياً:</div>
+        <a href="${m.externalLink}" target="_blank" class="btn btn-success" style="text-decoration:none">🔗 فتح الرابط في تاب جديد</a>
+      </div>`;
+      loading.style.display='flex';
+    }
+    frame.onload=()=>{
+      try{ if(frame.contentDocument?.body?.innerHTML?.length>50 && loading) loading.style.display='none'; }catch(e){}
+    };
+  } else {
+    // Daily.co داخلي
+    createOrGetDailyRoom(m).then(roomUrl => {
+      if(!roomUrl) return;
+      frame.src=roomUrl;
+      frame.onload=()=>{ if(loading) loading.style.display='none'; };
+    });
+  }
+
+  // استعادة المحضر
+  const saved=localStorage.getItem(MINUTES_KEY+m.id)||'';
+  const minEl=document.getElementById('minutes-text');
+  if(minEl){ minEl.value=saved; minEl.oninput=()=>{ localStorage.setItem(MINUTES_KEY+m.id, minEl.value); }; }
+  // إضافة نفسك للحضور
+  addAttendee(u?.username||'مشارك');
+  renderAttendees();
+  renderChatMessages();
+  // مؤقت
+  let elapsed=0;
+  if(_roomTimer) clearInterval(_roomTimer);
+  _roomTimer=setInterval(()=>{
+    elapsed++;
+    const h=Math.floor(elapsed/60),min=elapsed%60;
+    const lbl=document.getElementById('room-duration-label');
+    if(lbl) lbl.textContent=h>0?`${h}:${String(min).padStart(2,'0')} ساعة`:`${min} دقيقة`;
+  },60000);
+  const pmc=document.getElementById('post-meeting-card');
+  if(pmc) pmc.style.display='none';
+}
+
+/* ── Leave ── */
+function leaveMeeting(){
+  if(!confirm('هل تريد مغادرة الاجتماع؟')) return;
+  if(_roomTimer){ clearInterval(_roomTimer); _roomTimer=null; }
+  const frame=document.getElementById('jitsi-frame');
+  if(frame) frame.src='about:blank';
+  // show post-meeting
+  const pmc=document.getElementById('post-meeting-card');
+  if(pmc) pmc.style.display='';
+  const saved=_currentMeeting?localStorage.getItem(MINUTES_KEY+_currentMeeting.id):'';
+  const pContent=document.getElementById('post-meeting-content');
+  if(pContent) pContent.innerHTML=saved&&saved.trim()
+    ?`<pre style="white-space:pre-wrap;font-family:'Cairo',sans-serif;font-size:.85rem;color:var(--text);line-height:1.7">${saved}</pre>`
+    :'<span style="color:var(--muted)">لم يتم حفظ محضر لهذا الاجتماع.</span>';
+  _currentMeeting=null;
+  _activePanelId=null;
+  document.getElementById('room-side-panel').style.display='none';
+  showMeetingsList();
+  toast('👋 تم مغادرة الاجتماع','inf');
+}
+
+/* ── Delete ── */
+function deleteMeeting(id){
+  if(!confirm('حذف هذا الاجتماع؟')) return;
+  saveMeetings(getMeetings().filter(m=>m.id!==id));
+  renderMeetings();
+  updateMtgHero();
+  toast('🗑️ تم الحذف','warn');
+}
+
+/* ── Edit Meeting ── */
+function openEditMeeting(id){
+  const m=getMeetings().find(x=>x.id===id);
+  if(!m) return;
+  document.getElementById('edit-mt-id').value=m.id;
+  document.getElementById('edit-mt-title').value=m.title;
+  document.getElementById('edit-mt-type').value=m.type||'all';
+  const dt=new Date(m.datetime);
+  document.getElementById('edit-mt-date').value=dt.toISOString().slice(0,10);
+  document.getElementById('edit-mt-time').value=dt.toTimeString().slice(0,5);
+  document.getElementById('edit-mt-duration').value=m.duration||60;
+  document.getElementById('edit-mt-reminder').value=m.reminder||0;
+  document.getElementById('edit-mt-desc').value=m.desc||'';
+  // المادة
+  const subjectWrap=document.getElementById('edit-mt-subject-wrap');
+  const subjectSel=document.getElementById('edit-mt-subject');
+  if(m.type==='subject'){
+    if(subjectWrap) subjectWrap.style.display='';
+    if(subjectSel) subjectSel.value=m.subject||'';
+  } else {
+    if(subjectWrap) subjectWrap.style.display='none';
+  }
+  const modal=document.getElementById('edit-meeting-modal');
+  modal.style.display='flex';
+}
+function closeEditMeeting(){
+  document.getElementById('edit-meeting-modal').style.display='none';
+}
+function saveEditMeeting(){
+  const id=document.getElementById('edit-mt-id').value;
+  const title=document.getElementById('edit-mt-title').value.trim();
+  const date=document.getElementById('edit-mt-date').value;
+  const time=document.getElementById('edit-mt-time').value;
+  const duration=parseInt(document.getElementById('edit-mt-duration').value)||60;
+  const desc=document.getElementById('edit-mt-desc').value.trim();
+  const type=document.getElementById('edit-mt-type').value;
+  const subject=type==='subject'?(document.getElementById('edit-mt-subject')?.value||''):'';
+  const reminder=parseInt(document.getElementById('edit-mt-reminder').value)||0;
+  if(!title) return toast('⚠️ أدخل موضوع الاجتماع','err');
+  if(type==='subject'&&!subject) return toast('⚠️ اختر المادة','err');
+  const meetings=getMeetings();
+  const idx=meetings.findIndex(x=>x.id===id);
+  if(idx<0) return toast('⚠️ الاجتماع غير موجود','err');
+  meetings[idx]={...meetings[idx], title, desc, type, subject, duration, reminder, datetime:date+'T'+time};
+  saveMeetings(meetings);
+  closeEditMeeting();
+  updateMtgHero();
+  renderMeetings();
+  scheduleReminders();
+  toast('✅ تم تحديث الاجتماع','ok');
+}
+
+/* ── Side Panel ── */
+function toggleRoomPanel(panelId){
+  const sp=document.getElementById('room-side-panel');
+  const panels=['chat','attendees','minutes'];
+  if(_activePanelId===panelId){
+    sp.style.display='none'; _activePanelId=null; return;
+  }
+  _activePanelId=panelId;
+  sp.style.display='';
+  panels.forEach(p=>{
+    const el=document.getElementById('panel-'+p);
+    if(el) el.style.display=p===panelId?'flex':'none';
+  });
+  if(panelId==='chat') renderChatMessages();
+  if(panelId==='attendees') renderAttendees();
+}
+
+/* ── Chat ── */
+function sendChatMsg(){
+  const inp=document.getElementById('chat-input');
+  if(!inp||!inp.value.trim()) return;
+  const u=getLoggedUser();
+  const msg={
+    id:Date.now(), text:inp.value.trim(),
+    sender:u?.username||'مشارك',
+    time:new Date().toLocaleTimeString('ar-SA-u-nu-latn',{hour:'2-digit',minute:'2-digit'})
+  };
+  _chatMsgs.push(msg);
+  inp.value='';
+  renderChatMessages();
+}
+function renderChatMessages(){
+  const con=document.getElementById('chat-messages');
+  if(!con) return;
+  const u=getLoggedUser();
+  if(!_chatMsgs.length){
+    con.innerHTML='<div style="text-align:center;color:var(--muted);font-size:.8rem;margin-top:2rem">لا توجد رسائل بعد</div>';
+    return;
+  }
+  con.innerHTML=_chatMsgs.map(m=>{
+    const isMe=m.sender===(u?.username);
+    return `<div style="display:flex;flex-direction:column;align-items:${isMe?'flex-end':'flex-start'}">
+      <div style="font-size:.7rem;color:var(--muted);margin-bottom:.15rem">${isMe?'':m.sender+' · '}${m.time}</div>
+      <div class="chat-msg ${isMe?'me':'other'}">${m.text}</div>
+    </div>`;
+  }).join('');
+  con.scrollTop=con.scrollHeight;
+}
+
+/* ── Attendees ── */
+let _attendees=[];
+function addAttendee(name){
+  if(!_attendees.find(a=>a.name===name)){
+    _attendees.push({name, joinedAt:new Date().toLocaleTimeString('ar-SA-u-nu-latn',{hour:'2-digit',minute:'2-digit'})});
+  }
+}
+function renderAttendees(){
+  const con=document.getElementById('attendees-list');
+  if(!con) return;
+  if(!_attendees.length){
+    con.innerHTML='<div style="color:var(--muted);font-size:.82rem;text-align:center;margin-top:1rem">لا يوجد مشاركون</div>';
+    return;
+  }
+  con.innerHTML=_attendees.map(a=>{
+    const initials=a.name.slice(0,2);
+    return `<div class="attendee-row">
+      <div class="attendee-av">${initials}</div>
+      <div style="flex:1"><div style="font-size:.82rem;font-weight:700">${a.name}</div>
+      <div style="font-size:.72rem;color:var(--muted)">انضم ${a.joinedAt}</div></div>
+      <div style="width:8px;height:8px;border-radius:50%;background:var(--accent2)"></div>
+    </div>`;
+  }).join('');
+}
+function exportAttendees(){
+  if(!_currentMeeting) return;
+  const rows=[['الاسم','وقت الانضمام'],..._attendees.map(a=>[a.name,a.joinedAt])];
+  const csv=rows.map(r=>r.map(c=>`"${c}"`).join(',')).join('\n');
+  const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=`حضور_${_currentMeeting.title}_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  toast('📊 تم تصدير الحضور','ok');
+}
+
+/* ── Minutes ── */
+function saveMinutes(){
+  if(!_currentMeeting) return;
+  const text=document.getElementById('minutes-text')?.value||'';
+  localStorage.setItem(MINUTES_KEY+_currentMeeting.id, text);
+  toast('💾 تم حفظ المحضر','ok');
+}
+function exportMinutes(){
+  if(!_currentMeeting) return;
+  const text=document.getElementById('minutes-text')?.value||'';
+  const blob=new Blob([text],{type:'text/plain;charset=utf-8'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=`محضر_${_currentMeeting.title}.txt`;
+  a.click();
+}
+function viewMinutes(id){
+  const saved=localStorage.getItem(MINUTES_KEY+id);
+  const m=getMeetings().find(x=>x.id===id);
+  if(!saved||!saved.trim()){ toast('لا يوجد محضر لهذا الاجتماع','inf'); return; }
+  alert(`📝 محضر: ${m?.title||id}\n\n${saved}`);
+}
+
+/* ── Reminders ── */
+function scheduleReminders(){
+  _reminderTimers.forEach(t=>clearTimeout(t));
+  _reminderTimers=[];
+  getMeetings().forEach(m=>{
+    if(!m.reminder||m.reminder===0) return;
+    const start=new Date(m.datetime);
+    const remindAt=new Date(start.getTime()-m.reminder*60000);
+    const delay=remindAt-new Date();
+    if(delay<=0) return;
+    const t=setTimeout(()=>{
+      toast(`🔔 تذكير: "${m.title}" يبدأ خلال ${m.reminder} دقيقة`,'inf');
+      if('Notification' in window && Notification.permission==='granted'){
+        new Notification('🔔 تذكير اجتماع',{body:`"${m.title}" يبدأ خلال ${m.reminder} دقيقة`});
+      }
+    },delay);
+    _reminderTimers.push(t);
+  });
+  if('Notification' in window && Notification.permission==='default'){
+    Notification.requestPermission();
+  }
+}
+
+/* ── Calendar ── */
+function renderCalendar(){
+  const y=_calDate.getFullYear(), mo=_calDate.getMonth();
+  const label=document.getElementById('cal-month-label');
+  if(label) label.textContent=_calDate.toLocaleDateString('ar-SA-u-nu-latn',{year:'numeric',month:'long'});
+  const hdrs=document.getElementById('cal-headers');
+  const days=document.getElementById('cal-days');
+  if(!hdrs||!days) return;
+  const dayNames=['أح','إث','ثل','أر','خم','جم','سب'];
+  hdrs.innerHTML=dayNames.map(d=>`<div class="cal-day-header">${d}</div>`).join('');
+  const first=new Date(y,mo,1);
+  const startDow=first.getDay();
+  const daysInMonth=new Date(y,mo+1,0).getDate();
+  const today=new Date();
+  const meetings=getMeetings();
+  const now=new Date();
+  let html='';
+  for(let i=0;i<startDow;i++) html+=`<div class="cal-day other-month"></div>`;
+  for(let d=1;d<=daysInMonth;d++){
+    const dateStr=`${y}-${String(mo+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const dayMtgs=meetings.filter(m=>m.datetime.startsWith(dateStr));
+    const hasLive=dayMtgs.some(m=>{ const s=new Date(m.datetime),e=new Date(s.getTime()+(m.duration||60)*60000); return s<=now&&e>=now; });
+    const isToday=d===today.getDate()&&mo===today.getMonth()&&y===today.getFullYear();
+    let cls='cal-day';
+    if(isToday) cls+=' today';
+    if(hasLive) cls+=' has-live';
+    else if(dayMtgs.length) cls+=' has-meeting';
+    html+=`<div class="${cls}" onclick="calSelectDay('${dateStr}')">${d}${dayMtgs.length?`<div class="cal-dot"></div>`:''}</div>`;
+  }
+  days.innerHTML=html;
+}
+function calNav(dir){
+  _calDate.setMonth(_calDate.getMonth()+dir);
+  renderCalendar();
+}
+function calSelectDay(dateStr){
+  const mtgs=getMeetings().filter(m=>m.datetime.startsWith(dateStr));
+  const con=document.getElementById('cal-day-meetings');
+  if(!con) return;
+  if(!mtgs.length){ con.innerHTML=`<div style="color:var(--muted);font-size:.82rem;text-align:center">لا توجد اجتماعات في هذا اليوم</div>`; return; }
+  const now=new Date();
+  con.innerHTML=mtgs.map(m=>{
+    const s=new Date(m.datetime),e=new Date(s.getTime()+(m.duration||60)*60000);
+    const isLive=s<=now&&e>=now, isPast=e<now;
+    return `<div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:.75rem;margin-bottom:.5rem;display:flex;align-items:center;justify-content:space-between">
+      <div>
+        <div style="font-weight:700;font-size:.88rem">${m.title}</div>
+        <div style="font-size:.75rem;color:var(--muted)">${s.toLocaleTimeString('ar-SA-u-nu-latn',{hour:'2-digit',minute:'2-digit'})} (${m.duration||60} دق)</div>
+      </div>
+      ${!isPast?`<button class="btn btn-success btn-sm" onclick="joinMeeting('${m.id}')">🎥 دخول</button>`:'<span style="font-size:.75rem;color:var(--muted)">منتهي</span>'}
+    </div>`;
+  }).join('');
+}
+
+/* ── Load from cloud ── */
+async function loadMeetingsFromCloud(){
+  try{
+    const r=await fetch(GS_URL+'/rest/v1/school_data?key=eq.meetings&select=value&limit=1',{
+      headers:{apikey:GS_KEY,'Authorization':'Bearer '+GS_KEY}
+    });
+    const data=await r.json();
+    if(Array.isArray(data)&&data.length&&Array.isArray(data[0].value)){
+      localStorage.setItem(MEETINGS_KEY,JSON.stringify(data[0].value));
+    }
+  }catch(e){}
+}
+
+
+
+// ══════════════════════════════════════════════
+// 🎨 SIDEBAR FUNCTIONS
+// ══════════════════════════════════════════════
+function toggleSidebar(){
+  // sidebar is icon-only, nothing to toggle
+}
+
+function initSidebar(){
+  const sb = document.getElementById('sidebar');
+  if(!sb) return;
+  // استعادة حالة الطي
+  if(localStorage.getItem('sb_collapsed')==='1'){
+    sb.classList.add('collapsed');
+    const icon = document.getElementById('sidebar-toggle-icon');
+    if(icon) icon.textContent = '▶';
+  }
+  // تحديث عنوان الصفحة في الهيدر
+  updatePageTitle();
+}
+
+const _pageTitles = {
+  'page-dashboard':'لوحة التحكم | Dashboard | Tableau de bord',
+  'page-teacher':'تسجيل الحضور | Attendance | Présence',
+  'page-records':'السجلات | Records | Registres',
+  'page-students':'ملفات الطلاب | Students | Élèves',
+  'page-grades':'الدرجات | Grades | Notes',
+  'page-schedule':'جدول الحصص | Schedule | Emploi du temps',
+  'page-analytics':'إحصائيات | Analytics | Statistiques',
+  'page-docs':'ملفات المعلم | Teacher Files | Fichiers',
+  'page-admin':'الإدارة | Admin | Administration',
+  'page-meetings':'الاجتماعات | Meetings | Réunions',
+  'page-owner':'لوحة المالك | Owner Panel | Panneau propriétaire',
+};
+
+function updatePageTitle(){
+  const activePage = document.querySelector('.page.active');
+  if(!activePage) return;
+  const titleEl = document.getElementById('hdr-page-title');
+  if(!titleEl) return;
+  const titles = _pageTitles[activePage.id] || '';
+  const parts = titles.split('|');
+  const lang = document.documentElement.lang || 'ar';
+  if(lang==='en') titleEl.textContent = (parts[1]||parts[0]||'').trim();
+  else if(lang==='fr') titleEl.textContent = (parts[2]||parts[0]||'').trim();
+  else titleEl.textContent = (parts[0]||'').trim();
+}
+
+// تحديث اسم المستخدم في الـ sidebar
+function updateSidebarUser(username, role){
+  const nameEl = document.getElementById('hdr-teacher-name');
+  const roleEl = document.getElementById('sidebar-role-label');
+  const avatarEl = document.getElementById('sidebar-avatar');
+  const roleLabels = {admin:'مشرف | Admin', superadmin:'👑 مالك | Owner', teacher:'معلم | Teacher'};
+  if(nameEl) nameEl.textContent = username || '—';
+  if(roleEl) roleEl.textContent = roleLabels[role] || role || '—';
+  if(avatarEl) avatarEl.textContent = (username||'?')[0].toUpperCase();
+  // لون الأفاتار حسب الدور
+  const colors = {admin:'linear-gradient(135deg,#58a6ff,#1f6feb)',superadmin:'linear-gradient(135deg,#e3b341,#f0883e)',teacher:'linear-gradient(135deg,#3fb950,#2ea043)'};
+  if(avatarEl) avatarEl.style.background = colors[role] || colors.teacher;
+}
+
+// تحديث عنوان الصفحة عند التنقل
+const _origGoPage = goPage;
+window.goPage = function(id, btn){
+  _origGoPage(id, btn);
+  // تحديث الـ active في sidebar
+  document.querySelectorAll('.snav-btn').forEach(b=>{
+    const onclick = b.getAttribute('onclick')||'';
+    b.classList.toggle('active', onclick.includes(id));
+  });
+  updatePageTitle();
+};
+
+// تهيئة عند الحمل
+document.addEventListener('DOMContentLoaded', initSidebar);
+
 // ══════════════════════════════════════════════
 // 💳 SUBSCRIPTION SYSTEM
 // ══════════════════════════════════════════════
@@ -6294,5 +7879,7 @@ async function ownerLoadRequests() {
 }
 </script>
 
+</div><!-- /app-content -->
+</div><!-- /app-shell -->
 </body>
 </html>
