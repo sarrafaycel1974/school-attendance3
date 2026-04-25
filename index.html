@@ -5981,7 +5981,15 @@ function getAllowedClassIds(){
 function renderAppUsers(){
   const el = document.getElementById('users-list');
   if(!el) return;
-  const users = getAppUsers();
+  const _lu = (()=>{ try{ return JSON.parse(sessionStorage.getItem('aj_logged_user')); }catch(e){ return null; } })();
+  let users = getAppUsers();
+  /* سوبر أدمن: يشوف الكل | أدمن: يشوف اللي أضافهم فقط | معلم: نفسه فقط */
+  if(_lu && _lu.role === 'admin'){
+    users = users.filter(u => u.addedBy === _lu.username || u.username === _lu.username || u.role === 'superadmin' && false);
+  } else if(_lu && _lu.role === 'teacher'){
+    users = users.filter(u => u.username === _lu.username);
+  }
+  /* superadmin يشوف الكل بدون فلترة */
   if(!users.length){ el.innerHTML='<div class="empty">لا يوجد مستخدمون</div>'; return; }
   el.innerHTML = `<table class="data-table" style="margin-top:.5rem">
     <thead><tr><th>#</th><th>اسم المستخدم</th><th>كلمة المرور</th><th>الدور</th><th>🔗 ربط بمعلم</th><th>إجراءات</th></tr></thead>
@@ -6080,7 +6088,8 @@ function saveUserModal(){
     /* إضافة جديد */
     if(!pass){ toast('⚠️ أدخل كلمة المرور','err'); return; }
     if(users.find(u=>u.username===uname)){ toast('⚠️ اسم المستخدم موجود بالفعل','err'); return; }
-    users.push({ username: uname, password: pass, role });
+    const _adder = (()=>{ try{ return JSON.parse(sessionStorage.getItem('aj_logged_user')); }catch(e){ return null; } })();
+    users.push({ username: uname, password: pass, role, addedBy: _adder?.username||'admin' });
     toast('✅ تم إضافة المستخدم','ok');
   } else {
     /* تعديل */
@@ -7299,6 +7308,8 @@ function createMeeting(){
   meetings.push(meeting);
   saveMeetings(meetings);
   toast('✅ تم إنشاء الاجتماع','ok');
+  /* إشعار Telegram لكل المدرسين */
+  _notifyTeachersMeeting(meeting);
   playSound('ok');
   scheduleReminders();
   showMeetingsList();
@@ -7559,6 +7570,38 @@ function viewMinutes(id){
   const m=getMeetings().find(x=>x.id===id);
   if(!saved||!saved.trim()){ toast('لا يوجد محضر لهذا الاجتماع','inf'); return; }
   alert(`📝 محضر: ${m?.title||id}\n\n${saved}`);
+}
+
+/* ── إشعار المدرسين بالاجتماع عبر Telegram ── */
+async function _notifyTeachersMeeting(m){
+  const cfg = getTgConfig ? getTgConfig() : null;
+  if(!cfg || !cfg.enabled || !cfg.token || !cfg.chatId) return;
+  const s = new Date(m.datetime);
+  const dateStr = s.toLocaleDateString('ar-SA-u-nu-latn',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  const timeStr = s.toLocaleTimeString('ar-SA-u-nu-latn',{hour:'2-digit',minute:'2-digit'});
+  const u = getLoggedUser();
+  const msg = `📢 <b>اجتماع جديد</b>
+
+` +
+    `📌 <b>${m.title}</b>
+` +
+    `📅 ${dateStr}
+` +
+    `🕐 ${timeStr} (${m.duration||60} دقيقة)
+` +
+    (m.desc ? `📋 ${m.desc}
+` : '') +
+    `👤 المنسق: ${u?.username||'—'}
+
+` +
+    `🎥 رابط الدخول: سجّل دخول للتطبيق وادخل قسم الاجتماعات`;
+  try{
+    await fetch(`https://api.telegram.org/bot${cfg.token}/sendMessage`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({chat_id:cfg.chatId, text:msg, parse_mode:'HTML'})
+    });
+  }catch(e){ console.warn('Notify error:',e); }
 }
 
 /* ── Reminders ── */
