@@ -5978,9 +5978,22 @@ function getAllowedClassIds(){
   };
 })();
 
-function renderAppUsers(){
+async function renderAppUsers(){
   const el = document.getElementById('users-list');
   if(!el) return;
+
+  /* إذا ما في مستخدمين محملين بعد — اسحب من السحابة أولاً */
+  if(!window._cachedAppUsers || window._cachedAppUsers.length === 0){
+    el.innerHTML = '<div style="text-align:center;padding:1rem;color:var(--muted)">⏳ جاري تحميل المستخدمين...</div>';
+    try{
+      const cloud = await _pullUsersFromCloud();
+      if(cloud && cloud.length){
+        window._cachedAppUsers = cloud;
+        await _idbSet(USERS_IDB_KEY, cloud);
+      }
+    }catch(e){}
+  }
+
   const _lu = (()=>{ try{ return JSON.parse(sessionStorage.getItem('aj_logged_user')); }catch(e){ return null; } })();
   const allUsers = getAppUsers();
 
