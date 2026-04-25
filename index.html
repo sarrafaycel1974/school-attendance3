@@ -1905,6 +1905,29 @@ select option{background:var(--surface)}
         </tbody>
       </table>
     </div>
+    <!-- جدول المدرسين للمدرسة المختارة -->
+    <div id="owner-teachers-panel" style="display:none;margin-top:1.5rem">
+      <div class="card-head" style="margin-bottom:.75rem">
+        <div class="card-title">👨‍🏫 مدرسو: <span id="owner-teachers-school-name" style="color:var(--accent)"></span></div>
+        <button class="btn btn-ghost btn-sm" onclick="document.getElementById('owner-teachers-panel').style.display='none'">✕ إغلاق</button>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>الاسم</th>
+              <th>التخصص</th>
+              <th>الدور</th>
+              <th>الصفوف المسندة</th>
+            </tr>
+          </thead>
+          <tbody id="owner-teachers-body">
+            <tr><td colspan="5" style="text-align:center;color:var(--muted)">جاري التحميل...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
   </div>
 </div>
 </main>
@@ -5505,17 +5528,18 @@ async function _autoSyncToCloud() {
   clearTimeout(_autoSyncTimer);
   _autoSyncTimer = setTimeout(async () => {
     try {
+      const sid = CURRENT_SCHOOL_ID || 'default';
       await fetch(GS_URL + '/rest/v1/school_data', {
         method: 'POST',
         headers: {...GS_H, 'Prefer': 'resolution=merge-duplicates,return=minimal'},
         body: JSON.stringify([
-          {key: 'teachers',  value: DB.teachers},
-          {key: 'classes',   value: DB.classes},
-          {key: 'students',  value: DB.students},
-          {key: 'grades',    value: DB.gradeRecords || []},
-          {key: 'settings',  value: DB.settings},
-          {key: 'notes',     value: DB.notes || {}},
-          {key: 'app_users', value: getAppUsers()},
+          {key: sid+'_teachers',  value: DB.teachers},
+          {key: sid+'_classes',   value: DB.classes},
+          {key: sid+'_students',  value: DB.students},
+          {key: sid+'_grades',    value: DB.gradeRecords || []},
+          {key: sid+'_settings',  value: DB.settings},
+          {key: sid+'_notes',     value: DB.notes || {}},
+          {key: 'app_users',      value: getAppUsers()},
         ])
       });
       gsSetLast();
@@ -5535,13 +5559,20 @@ async function _autoPullOnLogin() {
     if (!dr.ok) return;
     const items = await dr.json();
     let changed = false;
+    const sid = CURRENT_SCHOOL_ID || 'default';
     items.forEach(it => {
-      if (it.key === 'teachers' && it.value?.length) { DB.teachers = it.value; changed = true; }
-      if (it.key === 'classes'  && it.value?.length) { DB.classes  = it.value; changed = true; }
-      if (it.key === 'students' && it.value?.length) { DB.students = it.value; changed = true; }
-      if (it.key === 'grades'   && it.value?.length) { DB.gradeRecords = it.value; changed = true; }
-      if (it.key === 'settings' && it.value)         { DB.settings = it.value; changed = true; }
-      if (it.key === 'notes'    && it.value)         { DB.notes    = it.value; changed = true; }
+      if (it.key === sid+'_teachers' && it.value?.length) { DB.teachers = it.value; changed = true; }
+      if (it.key === sid+'_classes'  && it.value?.length) { DB.classes  = it.value; changed = true; }
+      if (it.key === sid+'_students' && it.value?.length) { DB.students = it.value; changed = true; }
+      if (it.key === sid+'_grades'   && it.value?.length) { DB.gradeRecords = it.value; changed = true; }
+      if (it.key === sid+'_settings' && it.value)         { DB.settings = it.value; changed = true; }
+      if (it.key === sid+'_notes'    && it.value)         { DB.notes    = it.value; changed = true; }
+      // backward compat: if no school-specific data, try old keys
+      if (!changed) {
+        if (it.key === 'teachers' && it.value?.length) { DB.teachers = it.value; changed = true; }
+        if (it.key === 'classes'  && it.value?.length) { DB.classes  = it.value; changed = true; }
+        if (it.key === 'students' && it.value?.length) { DB.students = it.value; changed = true; }
+      }
       if (it.key === 'app_users' && it.value?.length) {
         window._cachedAppUsers = it.value;
         _idbSet(USERS_IDB_KEY, it.value);
@@ -7165,12 +7196,14 @@ let _calDate = new Date();
 let _activePanelId = null;
 let _chatMsgs = [];
 
+function _mtgKey(){ return 'meetings_'+(CURRENT_SCHOOL_ID||'default'); }
 function getMeetings(){ try{ return JSON.parse(localStorage.getItem(MEETINGS_KEY)||'[]'); }catch(e){ return []; } }
 function saveMeetings(arr){ localStorage.setItem(MEETINGS_KEY, JSON.stringify(arr)); cloudSaveMeetings(arr); }
 async function cloudSaveMeetings(arr){
   try{
+    const k = _mtgKey();
     await fetch(GS_URL+'/rest/v1/school_data',{method:'POST',headers:GS_H,
-      body:JSON.stringify({key:'meetings',value:arr})});
+      body:JSON.stringify({key:k,value:arr})});
   }catch(e){}
 }
 
@@ -7718,7 +7751,8 @@ function calSelectDay(dateStr){
 /* ── Load from cloud ── */
 async function loadMeetingsFromCloud(){
   try{
-    const r=await fetch(GS_URL+'/rest/v1/school_data?key=eq.meetings&select=value&limit=1',{
+    const k = _mtgKey();
+    const r=await fetch(GS_URL+'/rest/v1/school_data?key=eq.'+encodeURIComponent(k)+'&select=value&limit=1',{
       headers:{apikey:GS_KEY,'Authorization':'Bearer '+GS_KEY}
     });
     const data=await r.json();
@@ -7911,6 +7945,7 @@ async function ownerRefresh() {
           ${isActive ? `<button class="btn btn-danger btn-sm" onclick="ownerToggle('${s.school_id}',false)">⏸ إيقاف</button>` : `<button class="btn btn-success btn-sm" onclick="ownerToggle('${s.school_id}',true)">▶ تفعيل</button>`}
           <button class="btn btn-warn btn-sm" onclick="ownerRenew('${s.school_id}','${safeName}')">🔄 تجديد</button>
           <button class="btn btn-ghost btn-sm" onclick="ownerEdit('${s.school_id}','${safeName}','${s.contact||''}','${s.plan||''}')">✏️</button>
+          <button class="btn btn-sm" style="background:rgba(88,166,255,.15);color:var(--accent);border:1px solid rgba(88,166,255,.3)" onclick="ownerShowTeachers('${s.school_id}','${safeName}')">👨‍🏫 المدرسون</button>
         </div></td>
       </tr>`;
     }).join('');
@@ -7920,6 +7955,61 @@ async function ownerRefresh() {
     document.getElementById('owner-stat-expiring').textContent = expiring;
   } catch(e) {
     tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;color:var(--danger);padding:2rem">❌ خطأ: ${e.message}</td></tr>`;
+  }
+}
+
+async function ownerShowTeachers(school_id, schoolName) {
+  const panel = document.getElementById('owner-teachers-panel');
+  const nameEl = document.getElementById('owner-teachers-school-name');
+  const tbody  = document.getElementById('owner-teachers-body');
+  if (!panel || !tbody) return;
+  panel.style.display = '';
+  if (nameEl) nameEl.textContent = schoolName;
+  tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:1.5rem">⏳ جاري التحميل...</td></tr>';
+  // scroll to panel
+  panel.scrollIntoView({behavior:'smooth', block:'start'});
+  try {
+    // Load teachers from school_data using school-specific key
+    const r = await fetch(GS_URL + '/rest/v1/school_data?key=eq.' + encodeURIComponent(school_id + '_teachers') + '&select=value&limit=1', {
+      headers: { apikey: GS_KEY, 'Authorization': 'Bearer ' + GS_KEY }
+    });
+    const data = await r.json();
+    let teachers = [];
+    if (Array.isArray(data) && data.length && Array.isArray(data[0].value)) {
+      teachers = data[0].value;
+    }
+    // Also load app_users for role info
+    const ru = await fetch(GS_URL + '/rest/v1/school_data?key=eq.app_users&select=value&limit=1', {
+      headers: { apikey: GS_KEY, 'Authorization': 'Bearer ' + GS_KEY }
+    });
+    const udata = await ru.json();
+    const users = (Array.isArray(udata) && udata.length && Array.isArray(udata[0].value)) ? udata[0].value : [];
+    // Load classes for class names
+    const rc = await fetch(GS_URL + '/rest/v1/school_data?key=eq.' + encodeURIComponent(school_id + '_classes') + '&select=value&limit=1', {
+      headers: { apikey: GS_KEY, 'Authorization': 'Bearer ' + GS_KEY }
+    });
+    const cdata = await rc.json();
+    const classes = (Array.isArray(cdata) && cdata.length && Array.isArray(cdata[0].value)) ? cdata[0].value : [];
+    if (!teachers.length) {
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:1.5rem">لا يوجد مدرسون مضافون لهذه المدرسة</td></tr>';
+      return;
+    }
+    tbody.innerHTML = teachers.map((t, i) => {
+      const u = users.find(x => x.name === t.name || x.id === t.id);
+      const role = u ? (u.role === 'superadmin' ? '👑 سوبر أدمن' : u.role === 'admin' ? '🔐 أدمن' : '👨‍🏫 معلم') : '👨‍🏫 معلم';
+      const classNames = Array.isArray(t.classIds) && t.classIds.length
+        ? t.classIds.map(cid => { const c = classes.find(x=>x.id===cid); return c ? c.name : cid; }).join('، ')
+        : '<span style="color:var(--muted);font-size:.78rem">غير محدد</span>';
+      return `<tr>
+        <td>${i+1}</td>
+        <td><strong>${t.name||'—'}</strong></td>
+        <td style="color:var(--muted);font-size:.82rem">${t.subject||'—'}</td>
+        <td><span class="badge ${u?.role==='admin'||u?.role==='superadmin' ? 'badge-p' : 'badge-l'}" style="font-size:.7rem">${role}</span></td>
+        <td style="font-size:.78rem">${classNames}</td>
+      </tr>`;
+    }).join('');
+  } catch(e) {
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--danger);padding:1.5rem">❌ خطأ: ${e.message}</td></tr>`;
   }
 }
 
