@@ -5715,8 +5715,9 @@ async function gsSyncAuto(){
 // قائمة المستخدمين — يمكن للأدمن تعديلها من لوحة الإدارة
 // الحسابات محفوظة في IndexedDB (مع مزامنة سحابية عبر Supabase)
 const DEFAULT_USERS = [
-  { username: 'admin',   password: '1234', role: 'admin' },
-  { username: 'teacher', password: '1234', role: 'teacher' }
+  { username: 'sanad',   password: '123456', role: 'superadmin' },
+  { username: 'admin',   password: '1234',   role: 'admin' },
+  { username: 'teacher', password: '1234',   role: 'teacher' }
 ];
 
 const USERS_IDB_KEY = 'aj_app_users';
@@ -5818,39 +5819,48 @@ async function doAppLogin() {
   const pass  = (document.getElementById('login-password').value || '').trim();
   const err   = document.getElementById('login-err');
   const loginBtn = document.getElementById('login-submit-btn');
-  if(!uname||!pass){err.textContent='أدخل اسم المستخدم وكلمة المرور';return;}
-  if(loginBtn){loginBtn.disabled=true;loginBtn.textContent='جاري التحقق...';}
-  // سحب أحدث بيانات المستخدمين من السحابة قبل التحقق
-  try{
-    const cloudUsers = await _pullUsersFromCloud();
-    if(cloudUsers && cloudUsers.length){
-      window._cachedAppUsers = cloudUsers;
-      await _idbSet(USERS_IDB_KEY, cloudUsers);
-    }
-  }catch(e){}
-  if(loginBtn){loginBtn.disabled=false;loginBtn.textContent='دخول';}
+
   err.style.display = 'none';
-  if (!uname || !pass) { err.style.display = 'block'; return; }
+  if(!uname || !pass){
+    err.textContent = 'أدخل اسم المستخدم وكلمة المرور';
+    err.style.display = 'block';
+    return;
+  }
 
-  /* 1. جرب المستخدمين المحليين أولاً (سريع) */
-  let users = getAppUsers();
-  let found = users.find(u => u.username === uname && u.password === pass);
-  if (found) { _loginSuccess(found); return; }
+  if(loginBtn){ loginBtn.disabled=true; loginBtn.textContent='⏳ جاري التحقق...'; }
 
-  /* 2. لم يُوجد محلياً — اسحب من السحابة وأعد المحاولة */
-  if(loginBtn){ loginBtn.disabled=true; loginBtn.textContent='⏳ جارٍ التحقق...'; }
+  let found = null;
+
+  /* ── 1. السحابة أولاً دائماً ── */
   try {
-    const cloudUsers = await _pullUsersFromCloud();
-    if (cloudUsers && cloudUsers.length) {
-      window._cachedAppUsers = cloudUsers;
-      await _idbSet(USERS_IDB_KEY, cloudUsers);
-      found = cloudUsers.find(u => u.username === uname && u.password === pass);
+    const r = await fetch(
+      'https://ttsnxvlzuuyaovnaocrt.supabase.co/rest/v1/school_data?key=eq.app_users&limit=1',
+      { headers: { apikey: GS_KEY, 'Authorization': 'Bearer ' + GS_KEY } }
+    );
+    if(r.ok){
+      const items = await r.json();
+      if(items && items.length && Array.isArray(items[0].value)){
+        const cloudUsers = items[0].value;
+        window._cachedAppUsers = cloudUsers;
+        found = cloudUsers.find(u => u.username === uname && u.password === pass);
+      }
     }
   } catch(e) {}
+
+  /* ── 2. إذا فشل الاتصال — جرب المحفوظ محلياً ── */
+  if(!found){
+    const local = window._cachedAppUsers || DEFAULT_USERS;
+    found = local.find(u => u.username === uname && u.password === pass);
+  }
+
   if(loginBtn){ loginBtn.disabled=false; loginBtn.textContent='🔑 دخول'; }
 
-  if (found) { _loginSuccess(found); return; }
-  err.style.display = 'block';
+  if(found){
+    _loginSuccess(found);
+  } else {
+    err.textContent = '❌ اسم المستخدم أو كلمة المرور غير صحيحة';
+    err.style.display = 'block';
+  }
 }
 
 /* مزامنة يدوية لكلمات المرور من لوحة الإدارة */
