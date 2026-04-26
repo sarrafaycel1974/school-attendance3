@@ -5733,19 +5733,52 @@ async function saveAppUsers(users) {
   window._cachedAppUsers = users;
   /* حفظ في IndexedDB */
   await _idbSet(USERS_IDB_KEY, users);
-  /* مزامنة فورية مع Supabase في الخلفية */
-  _pushUsersToCloud(users).catch(e => console.warn('users cloud push:', e));
+  /* رفع فوري لـ Supabase مع انتظار النتيجة */
+  try {
+    await _pushUsersToCloud(users);
+  } catch(e) { console.warn('users cloud push failed:', e); }
 }
 
-/* ── رفع المستخدمين لـ Supabase ── */
+/* ── رفع المستخدمين لـ Supabase (UPSERT حقيقي) ── */
 async function _pushUsersToCloud(users) {
-  try {
-    await fetch(GS_URL + '/rest/v1/school_data', {
-      method: 'POST',
-      headers: {...GS_H,'Prefer':'resolution=merge-duplicates'},
-      body: JSON.stringify([{ key: 'app_users', value: users }])
-    });
-  } catch(e) { /* صامت — لا يؤثر على عمل التطبيق */ }
+  /* أولاً: تحقق إذا السجل موجود */
+  const checkR = await fetch(
+    GS_URL + '/rest/v1/school_data?key=eq.app_users&select=id',
+    { headers: { apikey: GS_KEY, 'Authorization': 'Bearer ' + GS_KEY } }
+  );
+  const existing = checkR.ok ? await checkR.json() : [];
+
+  if(existing && existing.length > 0){
+    /* UPDATE — حدّث السجل الموجود */
+    await fetch(
+      GS_URL + '/rest/v1/school_data?key=eq.app_users',
+      {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          apikey: GS_KEY,
+          'Authorization': 'Bearer ' + GS_KEY,
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify({ value: users, updated_at: new Date().toISOString() })
+      }
+    );
+  } else {
+    /* INSERT — أضف سجل جديد */
+    await fetch(
+      GS_URL + '/rest/v1/school_data',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          apikey: GS_KEY,
+          'Authorization': 'Bearer ' + GS_KEY,
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify({ key: 'app_users', value: users })
+      }
+    );
+  }
 }
 
 /* ── سحب المستخدمين من Supabase ── */
