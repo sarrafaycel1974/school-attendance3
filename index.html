@@ -5853,33 +5853,43 @@ async function doAppLogin() {
   if(loginBtn){ loginBtn.disabled=true; loginBtn.textContent='⏳ جاري التحقق...'; }
 
   let found = null;
+  let cloudReachable = false; /* هل وصلنا السحابة وجابت بيانات؟ */
 
   /* ── 1. السحابة أولاً دائماً ── */
   try {
     const r = await fetch(
-      'https://ttsnxvlzuuyaovnaocrt.supabase.co/rest/v1/school_data?key=eq.app_users&limit=1',
+      GS_URL + '/rest/v1/school_data?key=eq.app_users&limit=1',
       { headers: { apikey: GS_KEY, 'Authorization': 'Bearer ' + GS_KEY } }
     );
     if(r.ok){
       const items = await r.json();
       if(items && items.length && Array.isArray(items[0].value)){
+        cloudReachable = true; /* ✅ السحابة وصلت ورجعت بيانات */
         const cloudUsers = items[0].value;
         window._cachedAppUsers = cloudUsers;
+        await _idbSet(USERS_IDB_KEY, cloudUsers); /* حدّث الكاش المحلي دائماً */
         found = cloudUsers.find(u => u.username === uname && u.password === pass);
       }
     }
   } catch(e) {}
 
-  /* ── 2. إذا فشل الاتصال — جرب المحفوظ محلياً ── */
-  if(!found){
+  /* ── 2. Fallback فقط إذا السحابة غير متاحة كلياً (offline) ── */
+  if(!cloudReachable){
     const local = window._cachedAppUsers || DEFAULT_USERS;
     found = local.find(u => u.username === uname && u.password === pass);
+    if(found){
+      const cloudNote = document.getElementById('login-cloud-note');
+      if(cloudNote) cloudNote.innerHTML = '⚠️ وضع عدم الاتصال — كلمة المرور قد لا تكون محدّثة';
+    }
   }
 
   if(loginBtn){ loginBtn.disabled=false; loginBtn.textContent='🔑 دخول'; }
 
   if(found){
     _loginSuccess(found);
+  } else if(!cloudReachable){
+    err.textContent = '❌ لا يوجد اتصال بالسحابة وكلمة المرور المحلية غير صحيحة';
+    err.style.display = 'block';
   } else {
     err.textContent = '❌ اسم المستخدم أو كلمة المرور غير صحيحة';
     err.style.display = 'block';
