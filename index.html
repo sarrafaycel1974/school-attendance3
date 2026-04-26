@@ -5739,19 +5739,24 @@ function getAppUsers() {
   return window._cachedAppUsers || DEFAULT_USERS;
 }
 
-/* UPSERT واحد بسيط — يعمل دائماً */
+/* UPSERT موثوق — DELETE ثم INSERT (يعمل بدون unique constraint) */
 async function _upsertUsersCloud(users) {
+  const h = {
+    'Content-Type': 'application/json',
+    apikey: GS_KEY,
+    'Authorization': 'Bearer ' + GS_KEY
+  };
+  /* 1. احذف السجل القديم إن وجد */
+  await fetch(GS_URL + '/rest/v1/school_data?key=eq.app_users', {
+    method: 'DELETE', headers: h
+  });
+  /* 2. أدرج السجل الجديد */
   const r = await fetch(GS_URL + '/rest/v1/school_data', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      apikey: GS_KEY,
-      'Authorization': 'Bearer ' + GS_KEY,
-      'Prefer': 'resolution=merge-duplicates,return=minimal'
-    },
+    headers: { ...h, 'Prefer': 'return=minimal' },
     body: JSON.stringify({ key: 'app_users', value: users })
   });
-  if (!r.ok) throw new Error('Supabase UPSERT failed: ' + r.status);
+  if (!r.ok) throw new Error('Supabase INSERT failed: ' + r.status);
 }
 
 /* الحفظ الرئيسي — Supabase أولاً ثم الكاش */
