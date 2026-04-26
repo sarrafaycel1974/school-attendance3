@@ -3649,21 +3649,24 @@ function renderTeachersTable(){
   }).join('');
 }
 
-function editTeacherPass(tid){
+async function editTeacherPass(tid){
   const users=getAppUsers();
   const u=users.find(x=>x.teacherId===tid);
   if(!u)return;
   const t=DB.teachers.find(x=>x.id===tid);
-  const newPass=prompt(`كلمة مرور جديدة لـ "${t?.name}" (${u.username}):
-(6 أحرف على الأقل)`);
+  const newPass=prompt(`كلمة مرور جديدة لـ "${t?.name}" (${u.username}):\n(6 أحرف على الأقل)`);
   if(!newPass||!newPass.trim())return;
   if(newPass.trim().length<6)return toast('⚠️ كلمة المرور أقل من 6 أحرف','err');
   u.password=newPass.trim();
-  saveAppUsers(users);
-  toast('✅ تم تغيير كلمة المرور','ok');
+  try {
+    await saveAppUsers(users);
+    toast('✅ تم تغيير كلمة المرور على كل الأجهزة','ok');
+  } catch(e) {
+    toast('❌ فشل الحفظ — تحقق من الاتصال','err');
+  }
 }
 
-function addTeacherAccount(tid){
+async function addTeacherAccount(tid){
   const t=DB.teachers.find(x=>x.id===tid);if(!t)return;
   const uname=prompt(`اسم المستخدم للمدرس "${t.name}":`);
   if(!uname||!uname.trim())return;
@@ -3671,10 +3674,14 @@ function addTeacherAccount(tid){
   if(users.find(u=>u.username===uname.trim()))return toast('⚠️ اسم المستخدم موجود بالفعل','err');
   const upass=prompt('كلمة المرور (6 أحرف على الأقل):');
   if(!upass||upass.trim().length<6)return toast('⚠️ كلمة المرور قصيرة جداً','err');
-  users.push({username:uname.trim(),password:upass.trim(),role:'teacher',teacherId:tid});
-  saveAppUsers(users);
-  renderTeachersTable();
-  toast('✅ تم إنشاء الحساب','ok');
+  users.push({id:uid(),username:uname.trim(),password:upass.trim(),role:'teacher',teacherId:tid,school_id:CURRENT_SCHOOL_ID||null,created_at:new Date().toISOString()});
+  try {
+    await saveAppUsers(users);
+    renderTeachersTable();
+    toast('✅ تم إنشاء الحساب — يمكن الدخول من أي جهاز','ok');
+  } catch(e) {
+    toast('❌ فشل الحفظ — تحقق من الاتصال','err');
+  }
 }
 
 /* ════════════════════════════════════
@@ -5722,108 +5729,91 @@ const DEFAULT_USERS = [
 
 const USERS_IDB_KEY = 'aj_app_users';
 
-/* ── قراءة المستخدمين: IndexedDB أولاً ── */
+/* ═══════════════════════════════════════════════════
+   طبقة المستخدمين — Supabase أولاً دائماً
+   الهدف: أي تغيير يظهر فوراً على كل الأجهزة
+═══════════════════════════════════════════════════ */
+
+/* قراءة من الذاكرة (الكاش) */
 function getAppUsers() {
-  /* دائماً من الذاكرة عبر IDB — تُهيَّأ في _loadAppUsers */
   return window._cachedAppUsers || DEFAULT_USERS;
 }
 
-/* ── حفظ المستخدمين: IndexedDB + Supabase ── */
+/* UPSERT واحد بسيط — يعمل دائماً */
+async function _upsertUsersCloud(users) {
+  const r = await fetch(GS_URL + '/rest/v1/school_data', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      apikey: GS_KEY,
+      'Authorization': 'Bearer ' + GS_KEY,
+      'Prefer': 'resolution=merge-duplicates,return=minimal'
+    },
+    body: JSON.stringify({ key: 'app_users', value: users })
+  });
+  if (!r.ok) throw new Error('Supabase UPSERT failed: ' + r.status);
+}
+
+/* الحفظ الرئيسي — Supabase أولاً ثم الكاش */
 async function saveAppUsers(users) {
-  window._cachedAppUsers = users;
-  /* حفظ في IndexedDB */
-  await _idbSet(USERS_IDB_KEY, users);
-  /* رفع فوري لـ Supabase مع انتظار النتيجة */
+  /* 1. ارفع لـ Supabase فوراً */
   try {
-    await _pushUsersToCloud(users);
-  } catch(e) { console.warn('users cloud push failed:', e); }
-}
-
-/* ── رفع المستخدمين لـ Supabase (UPSERT حقيقي) ── */
-async function _pushUsersToCloud(users) {
-  /* أولاً: تحقق إذا السجل موجود */
-  const checkR = await fetch(
-    GS_URL + '/rest/v1/school_data?key=eq.app_users&select=id',
-    { headers: { apikey: GS_KEY, 'Authorization': 'Bearer ' + GS_KEY } }
-  );
-  const existing = checkR.ok ? await checkR.json() : [];
-
-  if(existing && existing.length > 0){
-    /* UPDATE — حدّث السجل الموجود */
-    await fetch(
-      GS_URL + '/rest/v1/school_data?key=eq.app_users',
-      {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          apikey: GS_KEY,
-          'Authorization': 'Bearer ' + GS_KEY,
-          'Prefer': 'return=minimal'
-        },
-        body: JSON.stringify({ value: users, updated_at: new Date().toISOString() })
-      }
-    );
-  } else {
-    /* INSERT — أضف سجل جديد */
-    await fetch(
-      GS_URL + '/rest/v1/school_data',
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          apikey: GS_KEY,
-          'Authorization': 'Bearer ' + GS_KEY,
-          'Prefer': 'return=minimal'
-        },
-        body: JSON.stringify({ key: 'app_users', value: users })
-      }
-    );
+    await _upsertUsersCloud(users);
+  } catch(e) {
+    console.warn('[saveAppUsers] cloud failed, saving locally only:', e);
+    toast('⚠️ تحذير: فشل الحفظ السحابي. البيانات محلية فقط.', 'err');
   }
+  /* 2. حدّث الكاش والـ IDB */
+  window._cachedAppUsers = users;
+  await _idbSet(USERS_IDB_KEY, users);
 }
 
-/* ── سحب المستخدمين من Supabase ── */
+/* سحب من Supabase */
 async function _pullUsersFromCloud() {
   try {
-    const r = await fetch(GS_URL + '/rest/v1/school_data?key=eq.app_users&order=id.desc&limit=1', {
-      headers: { apikey: GS_KEY, 'Authorization': 'Bearer ' + GS_KEY }
-    });
+    const r = await fetch(
+      GS_URL + '/rest/v1/school_data?key=eq.app_users&select=value&limit=1',
+      { headers: { apikey: GS_KEY, 'Authorization': 'Bearer ' + GS_KEY } }
+    );
     if (!r.ok) return null;
     const items = await r.json();
-    if (items && items.length && Array.isArray(items[0].value) && items[0].value.length) {
+    if (items?.length && Array.isArray(items[0].value) && items[0].value.length) {
       return items[0].value;
     }
   } catch(e) {}
   return null;
 }
 
-/* ── تحميل المستخدمين عند بدء التشغيل ── */
+/* تحميل عند البدء — السحابة هي المصدر الحقيقي */
 async function _loadAppUsers() {
-  /* 1. هجرة من localStorage إذا كانت موجودة */
-  const fromLS = localStorage.getItem('aj_app_users');
-  if (fromLS) {
-    try {
+  /* هجرة من localStorage */
+  try {
+    const fromLS = localStorage.getItem('aj_app_users');
+    if (fromLS) {
       const parsed = JSON.parse(fromLS);
-      if (parsed && parsed.length) {
-        await _idbSet(USERS_IDB_KEY, parsed);
+      if (parsed?.length) {
         localStorage.removeItem('aj_app_users');
+        /* ارفعها للسحابة إذا لم تكن موجودة */
+        await _upsertUsersCloud(parsed).catch(()=>{});
       }
-    } catch(e) {}
-  }
+    }
+  } catch(e) {}
 
-  /* 2. قراءة من IndexedDB */
-  let localUsers = await _idbGet(USERS_IDB_KEY);
-
-  /* 3. محاولة السحب من السحابة (إذا متصل) */
+  /* السحابة أولاً */
   const cloudUsers = await _pullUsersFromCloud();
-
-  /* 4. دمج: السحابة تكون مرجعاً إذا كانت تحتوي بيانات */
-  if (cloudUsers && cloudUsers.length) {
-    /* نأخذ السحابة كمرجع أساسي لأنها المصدر المشترك */
-    localUsers = cloudUsers;
-    await _idbSet(USERS_IDB_KEY, localUsers);
+  if (cloudUsers?.length) {
+    window._cachedAppUsers = cloudUsers;
+    await _idbSet(USERS_IDB_KEY, cloudUsers);
+    return;
   }
+  /* fallback: IDB المحلي */
+  const local = await _idbGet(USERS_IDB_KEY);
+  window._cachedAppUsers = local || DEFAULT_USERS;
+}
 
-  window._cachedAppUsers = localUsers || DEFAULT_USERS;
+/* _pushUsersToCloud = alias للتوافق مع الكود القديم */
+async function _pushUsersToCloud(users) {
+  return _upsertUsersCloud(users);
 }
 
 function _loginSuccess(found) {
@@ -7910,106 +7900,210 @@ async function requestSubscription(plan) {
 }
 
 // ══════════════════════════════════════════════
-// 👑 OWNER PANEL FUNCTIONS
+// 👑 OWNER PANEL — Supabase school_data (لا يحتاج جدول schools)
 // ══════════════════════════════════════════════
-const OWNER_URL = GS_URL + '/rest/v1/schools';
-const OWNER_H   = { apikey: GS_KEY, 'Authorization': 'Bearer ' + GS_KEY, 'Content-Type': 'application/json', 'Prefer': 'resolution=merge-duplicates,return=representation' };
+
+/* UPSERT قائمة المدارس */
+async function _ownerSaveSchools(schools) {
+  const r = await fetch(GS_URL + '/rest/v1/school_data', {
+    method: 'POST',
+    headers: { 'Content-Type':'application/json', apikey:GS_KEY,
+               'Authorization':'Bearer '+GS_KEY,
+               'Prefer':'resolution=merge-duplicates,return=minimal' },
+    body: JSON.stringify({ key:'schools_list', value:schools })
+  });
+  if (!r.ok) throw new Error('save schools failed: ' + r.status + ' ' + await r.text());
+}
+
+/* جلب قائمة المدارس */
+async function _ownerFetchSchools() {
+  try {
+    const r = await fetch(
+      GS_URL + '/rest/v1/school_data?key=eq.schools_list&select=value&limit=1',
+      { headers:{ apikey:GS_KEY, 'Authorization':'Bearer '+GS_KEY } }
+    );
+    const d = await r.json();
+    return (Array.isArray(d) && d.length && Array.isArray(d[0].value)) ? d[0].value : [];
+  } catch(e) { return []; }
+}
 
 async function ownerRefresh() {
   const tbody = document.getElementById('owner-schools-body');
   if (!tbody) return;
   tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:2rem">⏳ جاري التحميل...</td></tr>';
+  let schools;
+  try { schools = await _ownerFetchSchools(); } catch(e) { schools = []; }
+  if (!schools.length) {
+    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:2rem">لا توجد مدارس — اضغط ➕ إضافة مدرسة</td></tr>';
+    ['total','active','inactive','expiring'].forEach(k=>{const el=document.getElementById('owner-stat-'+k);if(el)el.textContent='0';});
+    return;
+  }
+  const today=new Date(), soon=new Date(); soon.setDate(soon.getDate()+14);
+  let active=0,inactive=0,expiring=0;
+  tbody.innerHTML = schools.map((s,i)=>{
+    const exp=s.expires_at?new Date(s.expires_at):null;
+    const isActive=s.active!==false&&(!exp||exp>today);
+    const isExpiring=isActive&&exp&&exp<=soon;
+    if(isActive)active++;else inactive++;
+    if(isExpiring)expiring++;
+    const expStr=exp?exp.toLocaleDateString('ar-SA-u-nu-latn'):'—';
+    const statusBadge=isActive?'<span class="badge badge-p" style="font-size:.72rem">✅ نشط</span>':'<span class="badge badge-a" style="font-size:.72rem">❌ موقوف</span>';
+    const expBadge=isExpiring?`<span style="color:var(--warn);font-size:.72rem">⚠️ ${expStr}</span>`:`<span style="font-size:.78rem">${expStr}</span>`;
+    const plan=s.plan==='yearly'?'📅 سنوي':s.plan==='monthly'?'🗓️ شهري':'—';
+    const sid=s.school_id||'';
+    return `<tr>
+      <td>${i+1}</td>
+      <td><strong>${s.name||'—'}</strong><br><small style="color:var(--muted);font-size:.7rem">${s.contact||''}</small></td>
+      <td><code style="font-size:.68rem;color:var(--accent)">${sid}</code><br><span style="font-size:.75rem;color:var(--warn);font-weight:700;letter-spacing:1px">${s.code||'—'}</span></td>
+      <td style="text-align:center">${s.teachers_count||0}</td>
+      <td style="text-align:center">${s.students_count||0}</td>
+      <td>${plan}</td>
+      <td>${expBadge}</td>
+      <td>${statusBadge}</td>
+      <td><div class="actions" style="flex-wrap:wrap;gap:.3rem">
+        ${isActive?`<button class="btn btn-danger btn-sm" onclick="ownerToggle('${sid}',false)">⏸ إيقاف</button>`:`<button class="btn btn-success btn-sm" onclick="ownerToggle('${sid}',true)">▶ تفعيل</button>`}
+        <button class="btn btn-warn btn-sm" onclick="ownerRenew('${sid}')">🔄 تجديد</button>
+        <button class="btn btn-ghost btn-sm" onclick="ownerEdit('${sid}')">✏️ تعديل</button>
+        ${s.code?`<button class="btn btn-sm" style="background:rgba(227,179,65,.12);color:var(--warn);border:1px solid rgba(227,179,65,.25)" onclick="ownerCopyCode('${s.code}')">📋 ${s.code}</button>`:`<button class="btn btn-sm" style="background:rgba(227,179,65,.08);color:var(--warn);border:1px solid rgba(227,179,65,.2)" onclick="ownerGenerateCode('${sid}')">🔑 توليد رمز</button>`}
+        <button class="btn btn-sm" style="background:rgba(88,166,255,.12);color:var(--accent);border:1px solid rgba(88,166,255,.25)" onclick="ownerShowTeachers('${sid}','${(s.name||'').replace(/'/g,"\\'")}')">👨‍🏫 المدرسون</button>
+        <button class="btn btn-sm" style="background:rgba(63,185,80,.15);color:var(--accent2);border:1px solid rgba(63,185,80,.3)" onclick="ownerEnterSchool('${sid}','${(s.name||'').replace(/'/g,"\\'")}')">🚪 إدارة</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+  document.getElementById('owner-stat-total').textContent=schools.length;
+  document.getElementById('owner-stat-active').textContent=active;
+  document.getElementById('owner-stat-inactive').textContent=inactive;
+  document.getElementById('owner-stat-expiring').textContent=expiring;
+}
+
+async function ownerToggle(school_id,active){
+  if(!confirm(active?'تفعيل هذه المدرسة؟':'إيقاف هذه المدرسة؟'))return;
+  const schools=await _ownerFetchSchools();
+  const s=schools.find(x=>x.school_id===school_id);
+  if(s)s.active=active;
+  await _ownerSaveSchools(schools);
+  toast(active?'✅ تم التفعيل':'⏸ تم الإيقاف','ok'); ownerRefresh();
+}
+
+async function ownerRenew(school_id){
+  const schools=await _ownerFetchSchools();
+  const s=schools.find(x=>x.school_id===school_id);if(!s)return;
+  const months=prompt(`تجديد اشتراك "${s.name}"\nعدد الأشهر:`);
+  if(!months||isNaN(months)||+months<1)return;
+  const exp=new Date();exp.setMonth(exp.getMonth()+parseInt(months));
+  s.expires_at=exp.toISOString();s.active=true;
+  await _ownerSaveSchools(schools);
+  toast('✅ تم التجديد حتى '+exp.toLocaleDateString('ar-SA-u-nu-latn'),'ok');ownerRefresh();
+}
+
+async function ownerEdit(school_id){
+  const schools=await _ownerFetchSchools();
+  const s=schools.find(x=>x.school_id===school_id);if(!s)return;
+  const newName=prompt('اسم المدرسة:',s.name);if(!newName)return;
+  const newContact=prompt('جهة التواصل:',s.contact||'')||'';
+  const newPlan=prompt('نوع الاشتراك (monthly/yearly):',s.plan||'monthly')||'monthly';
+  s.name=newName;s.contact=newContact;s.plan=newPlan;
+  await _ownerSaveSchools(schools);
+  toast('✅ تم التحديث','ok');ownerRefresh();
+}
+
+async function ownerAddSchool(){
+  const name=prompt('اسم المدرسة الجديدة:');if(!name||!name.trim())return;
+  const contact=prompt('جهة التواصل (اختياري):')||'';
+  const plan=prompt('نوع الاشتراك (monthly/yearly):','monthly')||'monthly';
+  const months=parseInt(prompt('مدة الاشتراك بالأشهر:','12')||'12');
+  const exp=new Date();exp.setMonth(exp.getMonth()+months);
+  const school_id='sch_'+Date.now();
+  const initials=(name.trim().split(' ').map(w=>w[0]||'').join('').toUpperCase().slice(0,3))||'SCH';
+  const code=initials+'-'+Math.floor(1000+Math.random()*9000);
+  let schools;
+  try { schools=await _ownerFetchSchools(); } catch(e){ schools=[]; }
+  schools.push({school_id,name:name.trim(),contact,plan,code,active:true,
+    expires_at:exp.toISOString(),teachers_count:0,students_count:0,
+    created_at:new Date().toISOString()});
   try {
-    const r = await fetch(OWNER_URL + '?order=created_at.desc', { headers: OWNER_H });
-    const schools = await r.json();
-    if (!Array.isArray(schools) || !schools.length) {
-      tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:2rem">لا توجد مدارس مسجلة بعد</td></tr>';
-      ['total','active','inactive','expiring'].forEach(k => { const el=document.getElementById('owner-stat-'+k); if(el) el.textContent='0'; });
-      return;
-    }
-    const today = new Date();
-    const soon  = new Date(); soon.setDate(soon.getDate() + 14);
-    let active = 0, inactive = 0, expiring = 0;
-    tbody.innerHTML = schools.map((s, i) => {
-      const exp = s.expires_at ? new Date(s.expires_at) : null;
-      const isActive = s.active && (!exp || exp > today);
-      const isExpiring = isActive && exp && exp <= soon;
-      if (isActive) active++; else inactive++;
-      if (isExpiring) expiring++;
-      const expStr = exp ? exp.toLocaleDateString('ar-SA-u-nu-latn') : '—';
-      const statusBadge = isActive ? `<span class="badge badge-p" style="font-size:.72rem">✅ نشط</span>` : `<span class="badge badge-a" style="font-size:.72rem">❌ موقوف</span>`;
-      const expBadge = isExpiring ? `<span style="color:var(--warn);font-size:.72rem">⚠️ ${expStr}</span>` : `<span style="font-size:.78rem">${expStr}</span>`;
-      const plan = s.plan === 'yearly' ? '📅 سنوي' : s.plan === 'monthly' ? '🗓️ شهري' : '—';
-      const safeName = (s.name||'').replace(/'/g,"\'");
-      return `<tr>
-        <td>${i+1}</td>
-        <td><strong>${s.name||'—'}</strong><br><small style="color:var(--muted);font-size:.7rem">${s.contact||''}</small></td>
-        <td><code style="font-size:.7rem;color:var(--muted)">${s.school_id||'—'}</code></td>
-        <td style="text-align:center">${s.teachers_count||0}</td>
-        <td style="text-align:center">${s.students_count||0}</td>
-        <td>${plan}</td>
-        <td>${expBadge}</td>
-        <td>${statusBadge}</td>
-        <td><div class="actions" style="flex-wrap:wrap;gap:.3rem">
-          ${isActive ? `<button class="btn btn-danger btn-sm" onclick="ownerToggle('${s.school_id}',false)">⏸ إيقاف</button>` : `<button class="btn btn-success btn-sm" onclick="ownerToggle('${s.school_id}',true)">▶ تفعيل</button>`}
-          <button class="btn btn-warn btn-sm" onclick="ownerRenew('${s.school_id}','${safeName}')">🔄 تجديد</button>
-          <button class="btn btn-ghost btn-sm" onclick="ownerEdit('${s.school_id}','${safeName}','${s.contact||''}','${s.plan||''}')">✏️</button>
-        </div></td>
-      </tr>`;
-    }).join('');
-    document.getElementById('owner-stat-total').textContent    = schools.length;
-    document.getElementById('owner-stat-active').textContent   = active;
-    document.getElementById('owner-stat-inactive').textContent = inactive;
-    document.getElementById('owner-stat-expiring').textContent = expiring;
-  } catch(e) {
-    tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;color:var(--danger);padding:2rem">❌ خطأ: ${e.message}</td></tr>`;
+    await _ownerSaveSchools(schools);
+    toast('✅ تمت الإضافة\nرمز الدخول: '+code,'ok');
+    ownerRefresh();
+  } catch(e){
+    toast('❌ فشل الحفظ: '+e.message,'err');
   }
 }
 
-async function ownerToggle(school_id, active) {
-  if (!confirm(active ? `تفعيل هذه المدرسة؟` : `إيقاف هذه المدرسة؟`)) return;
-  await fetch(OWNER_URL + `?school_id=eq.${school_id}`, { method:'PATCH', headers:OWNER_H, body:JSON.stringify({active}) });
-  toast(active ? '✅ تم التفعيل' : '⏸ تم الإيقاف', 'ok');
-  ownerRefresh();
+function ownerCopyCode(code){
+  if(!code){toast('❌ لا يوجد رمز','err');return;}
+  const text='رمز دخول مدرستك: '+code+'\nافتح التطبيق وأدخل بياناتك ثم ضع هذا الرمز.';
+  navigator.clipboard.writeText(text).then(()=>toast('📋 تم نسخ الرمز: '+code,'ok')).catch(()=>prompt('انسخ هذا الرمز:',text));
 }
 
-async function ownerRenew(school_id, name) {
-  const months = prompt(`تجديد اشتراك "${name}"
-عدد الأشهر:`);
-  if (!months || isNaN(months) || +months < 1) return;
-  const exp = new Date(); exp.setMonth(exp.getMonth() + parseInt(months));
-  await fetch(OWNER_URL + `?school_id=eq.${school_id}`, { method:'PATCH', headers:OWNER_H, body:JSON.stringify({expires_at:exp.toISOString(),active:true}) });
-  toast(`✅ تم التجديد حتى ${exp.toLocaleDateString('ar-SA-u-nu-latn')}`, 'ok');
-  ownerRefresh();
+async function ownerGenerateCode(school_id){
+  const schools=await _ownerFetchSchools();
+  const s=schools.find(x=>x.school_id===school_id);if(!s)return;
+  if(s.code){toast('الرمز موجود: '+s.code,'ok');return;}
+  const initials=(s.name||'SCH').split(' ').map(w=>w[0]||'').join('').toUpperCase().slice(0,3);
+  s.code=initials+'-'+Math.floor(1000+Math.random()*9000);
+  await _ownerSaveSchools(schools);
+  toast('✅ رمز جديد: '+s.code,'ok');ownerRefresh();
 }
 
-async function ownerEdit(school_id, name, contact, plan) {
-  const newName = prompt('اسم المدرسة:', name); if (!newName) return;
-  const newContact = prompt('جهة التواصل:', contact) || '';
-  const newPlan = prompt('نوع الاشتراك (monthly/yearly):', plan||'monthly') || 'monthly';
-  await fetch(OWNER_URL + `?school_id=eq.${school_id}`, { method:'PATCH', headers:OWNER_H, body:JSON.stringify({name:newName,contact:newContact,plan:newPlan}) });
-  toast('✅ تم التحديث', 'ok'); ownerRefresh();
+async function ownerShowTeachers(school_id,schoolName){
+  const panel=document.getElementById('owner-teachers-panel');
+  const nameEl=document.getElementById('owner-teachers-school-name');
+  const tbody=document.getElementById('owner-teachers-body');
+  if(!panel||!tbody)return;
+  panel.style.display='';
+  if(nameEl)nameEl.textContent=schoolName;
+  tbody.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:1.5rem">⏳ جاري التحميل...</td></tr>';
+  panel.scrollIntoView({behavior:'smooth',block:'start'});
+  try{
+    const r=await fetch(GS_URL+'/rest/v1/school_data?key=eq.'+encodeURIComponent(school_id+'_teachers')+'&select=value&limit=1',
+      {headers:{apikey:GS_KEY,'Authorization':'Bearer '+GS_KEY}});
+    const d=await r.json();
+    const teachers=(Array.isArray(d)&&d.length&&Array.isArray(d[0].value))?d[0].value:[];
+    const ru=await fetch(GS_URL+'/rest/v1/school_data?key=eq.app_users&select=value&limit=1',
+      {headers:{apikey:GS_KEY,'Authorization':'Bearer '+GS_KEY}});
+    const ud=await ru.json();
+    const users=(Array.isArray(ud)&&ud.length&&Array.isArray(ud[0].value))?ud[0].value:[];
+    if(!teachers.length){
+      tbody.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:1.5rem">لا يوجد مدرسون مضافون لهذه المدرسة</td></tr>';
+      return;
+    }
+    tbody.innerHTML=teachers.map((t,i)=>{
+      const u=users.find(x=>x.teacherId===t.id||x.name===t.name);
+      const role=u?(u.role==='superadmin'?'👑 سوبر أدمن':u.role==='admin'?'🔐 أدمن':'👨‍🏫 معلم'):'—';
+      const uname=u?u.username:'بدون حساب';
+      return `<tr><td>${i+1}</td><td><strong>${t.name||'—'}</strong></td><td style="color:var(--muted)">${t.subject||'—'}</td><td>${role}</td><td style="font-size:.78rem">${uname}</td></tr>`;
+    }).join('');
+  }catch(e){
+    tbody.innerHTML=`<tr><td colspan="5" style="text-align:center;color:var(--danger)">❌ ${e.message}</td></tr>`;
+  }
 }
 
-async function ownerAddSchool() {
-  const name = prompt('اسم المدرسة الجديدة:'); if (!name||!name.trim()) return;
-  const contact = prompt('جهة التواصل (اختياري):') || '';
-  const plan = prompt('نوع الاشتراك (monthly/yearly):', 'monthly') || 'monthly';
-  const months = parseInt(prompt('مدة الاشتراك بالأشهر:', '1')||'1');
-  const exp = new Date(); exp.setMonth(exp.getMonth()+months);
-  const school_id = 'sch_'+Date.now();
-  await fetch(OWNER_URL, { method:'POST', headers:OWNER_H, body:JSON.stringify({school_id,name:name.trim(),contact,plan,active:true,expires_at:exp.toISOString(),teachers_count:0,students_count:0}) });
-  toast('✅ تمت الإضافة — school_id: '+school_id, 'ok');
-  ownerRefresh();
+async function ownerEnterSchool(school_id,school_name){
+  if(!confirm('ستدخل كمدير مدرسة:\n'+school_name+'\n\nمتابعة؟'))return;
+  CURRENT_SCHOOL_ID=school_id;
+  try{
+    const r=await fetch(GS_URL+'/rest/v1/school_data?key=like.'+encodeURIComponent(school_id)+'*&select=key,value',
+      {headers:{apikey:GS_KEY,'Authorization':'Bearer '+GS_KEY}});
+    const items=await r.json();
+    if(Array.isArray(items)){
+      items.forEach(it=>{
+        if(it.key===school_id+'_teachers'&&it.value?.length)DB.teachers=it.value;
+        if(it.key===school_id+'_classes'&&it.value?.length)DB.classes=it.value;
+        if(it.key===school_id+'_students'&&it.value?.length)DB.students=it.value;
+      });
+      await persist();
+    }
+  }catch(e){}
+  const tnSub=document.getElementById('tnav-sub');
+  if(tnSub)tnSub.textContent='📍 '+school_name;
+  toast('📍 تم الدخول كمدير: '+school_name,'ok');
+  goPage('page-admin',null,'admin');
+  setTimeout(()=>{renderTeachersTable();renderClassesTable();renderStudentsTable();},300);
 }
 
-// طلبات الاشتراك
-async function ownerLoadRequests() {
-  try {
-    const r = await fetch(GS_URL+'/rest/v1/subscription_requests?order=requested_at.desc', { headers: OWNER_H });
-    return await r.json();
-  } catch(e) { return []; }
-}
+async function ownerLoadRequests(){return [];}
+
 </script>
 
 </div><!-- /app-content -->
