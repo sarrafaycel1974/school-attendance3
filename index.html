@@ -5791,29 +5791,18 @@ async function _pullUsersFromCloud() {
 
 /* تحميل عند البدء — السحابة هي المصدر الحقيقي */
 async function _loadAppUsers() {
-  /* هجرة من localStorage */
-  try {
-    const fromLS = localStorage.getItem('aj_app_users');
-    if (fromLS) {
-      const parsed = JSON.parse(fromLS);
-      if (parsed?.length) {
-        localStorage.removeItem('aj_app_users');
-        /* ارفعها للسحابة إذا لم تكن موجودة */
-        await _upsertUsersCloud(parsed).catch(()=>{});
-      }
-    }
-  } catch(e) {}
+  /* امسح IDB القديم — السحابة هي المرجع الوحيد */
+  try { await _idbSet(USERS_IDB_KEY, null); } catch(e) {}
+  try { localStorage.removeItem('aj_app_users'); } catch(e) {}
 
-  /* السحابة أولاً */
+  /* السحابة فقط */
   const cloudUsers = await _pullUsersFromCloud();
   if (cloudUsers?.length) {
     window._cachedAppUsers = cloudUsers;
-    await _idbSet(USERS_IDB_KEY, cloudUsers);
     return;
   }
-  /* fallback: IDB المحلي */
-  const local = await _idbGet(USERS_IDB_KEY);
-  window._cachedAppUsers = local || DEFAULT_USERS;
+  /* fallback فقط إذا الشبكة مقطوعة */
+  window._cachedAppUsers = DEFAULT_USERS;
 }
 
 /* _pushUsersToCloud = alias للتوافق مع الكود القديم */
@@ -5868,12 +5857,15 @@ async function doAppLogin() {
     );
     if(r.ok){
       const items = await r.json();
-      if(items && items.length && Array.isArray(items[0].value)){
-        cloudReachable = true; /* ✅ السحابة وصلت ورجعت بيانات */
-        const cloudUsers = items[0].value;
-        window._cachedAppUsers = cloudUsers;
-        await _idbSet(USERS_IDB_KEY, cloudUsers); /* حدّث الكاش المحلي دائماً */
-        found = cloudUsers.find(u => u.username === uname && u.password === pass);
+      if(items && items.length){
+        let cloudUsers = items[0].value;
+        /* إذا جاء كـ string حوّله لـ array */
+        if(typeof cloudUsers === 'string') try{ cloudUsers = JSON.parse(cloudUsers); }catch(e){}
+        if(Array.isArray(cloudUsers) && cloudUsers.length){
+          cloudReachable = true;
+          window._cachedAppUsers = cloudUsers;
+          found = cloudUsers.find(u => u.username === uname && u.password === pass);
+        }
       }
     }
   } catch(e) {}
@@ -6668,7 +6660,7 @@ function toggleChangePass(){
   document.getElementById('cp-err').style.display='none';
   document.getElementById('cp-ok').style.display='none';
 }
-function doChangePassword(){
+async function doChangePassword(){
   const uname=(document.getElementById('cp-username')?.value||'').trim();
   const oldP=(document.getElementById('cp-old')?.value||'').trim();
   const newP=(document.getElementById('cp-new')?.value||'').trim();
@@ -6677,11 +6669,16 @@ function doChangePassword(){
   errEl.style.display='none'; okEl.style.display='none';
   if(!uname||!oldP||!newP){errEl.textContent='⚠️ أكمل جميع الحقول';errEl.style.display='block';return;}
   if(newP.length<6){errEl.textContent='⚠️ كلمة المرور الجديدة أقل من 6 أحرف';errEl.style.display='block';return;}
-  const users=getAppUsers();
+
+  /* اجلب أحدث نسخة من السحابة أولاً */
+  const cloudUsers = await _pullUsersFromCloud();
+  const users = cloudUsers || getAppUsers();
+  if(cloudUsers) window._cachedAppUsers = cloudUsers;
+
   const idx=users.findIndex(u=>u.username===uname&&u.password===oldP);
   if(idx===-1){errEl.textContent='❌ اسم المستخدم أو كلمة المرور الحالية غير صحيحة';errEl.style.display='block';return;}
   users[idx].password=newP;
-  saveAppUsers(users);
+  await saveAppUsers(users);
   okEl.style.display='block';
   document.getElementById('cp-old').value='';
   document.getElementById('cp-new').value='';
