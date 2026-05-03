@@ -2040,9 +2040,9 @@ select option{background:var(--surface)}
     </div>
   </div>
   <div style="display:grid;grid-template-columns:1fr;gap:1rem;align-items:start">
-    <!-- قائمة الصفوف مخفية — لا تأخذ مكان -->
-    <div id="sch-classes-lbl" style="display:none"></div>
-    <div id="sched-classes-list" style="display:none"></div>
+    <!-- قائمة الصفوف -->
+    <div id="sch-classes-lbl" style="font-size:.82rem;font-weight:700;color:var(--muted);margin-bottom:.4rem"></div>
+    <div id="sched-classes-list" style="display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:.75rem"></div>
     <!-- الجدول -->
     <div class="card" style="padding:1rem;overflow-x:auto">
       <div id="period-times-bar-wrap"></div>
@@ -4662,12 +4662,10 @@ function initChoose(){
       cids.includes(c.id) && DB.students.some(s => s.classId === c.id)
     );
   } else if(linkedT){
-    /* معلم — صفوفه فقط (ضمن مدرسته) */
+    /* معلم — صفوفه المسندة كلها (ضمن مدرسته)، سواء كان فيها طلاب أو لا */
     const cids = getTeacherClassIds(linkedT.id);
     const _visC2 = getVisibleClasses();
-    classesWithStudents = _visC2.filter(c =>
-      cids.includes(c.id) && DB.students.some(s => s.classId === c.id)
-    );
+    classesWithStudents = _visC2.filter(c => cids.includes(c.id));
   } else {
     classesWithStudents = [];
   }
@@ -4714,7 +4712,7 @@ function onTeacherChange(){
   } else {
     const cids = getTeacherClassIds(tid);
     classesWithStudents = cids.length
-      ? DB.classes.filter(c => cids.includes(c.id) && DB.students.some(s => s.classId === c.id))
+      ? DB.classes.filter(c => cids.includes(c.id)) /* كل الصفوف المسندة للمدرس بغض النظر عن وجود طلاب */
       : DB.classes.filter(c => DB.students.some(s => s.classId === c.id)); /* مدرس بلا صفوف محددة → الأدمن يرى الكل */
   }
   classesWithStudents.forEach(c=>{const o=document.createElement('option');o.value=c.id;o.textContent=c.name+(c.stage?' ('+c.stage+')':'');cs.appendChild(o)});
@@ -6528,10 +6526,26 @@ async function _autoSyncOnStart(){
     /* إذا الأدمن بدون school_id — لا نحمّل بيانات أي مدرسة */
     if(!_sPfx && _syncUser && _syncUser.role === 'admin') return;
     Object.values(latestMap).forEach(it=>{
-      if(it.key===_sPfx+'teachers' && it.value?.length){ DB.teachers=it.value; changed=true; }
-      if(it.key===_sPfx+'classes'  && it.value?.length){ DB.classes=it.value;  changed=true; }
-      if(it.key===_sPfx+'students' && it.value?.length){ DB.students=it.value; changed=true; }
-      if(it.key===_sPfx+'grades'   && it.value?.length){ DB.gradeRecords=it.value; changed=true; }
+      if(it.key===_sPfx+'teachers' && it.value?.length){
+        const localIds=new Set(DB.teachers.map(x=>x.id));
+        DB.teachers=[...DB.teachers,...it.value.filter(x=>!localIds.has(x.id))];
+        changed=true;
+      }
+      if(it.key===_sPfx+'classes'  && it.value?.length){
+        const localIds=new Set(DB.classes.map(x=>x.id));
+        DB.classes=[...DB.classes,...it.value.filter(x=>!localIds.has(x.id))];
+        changed=true;
+      }
+      if(it.key===_sPfx+'students' && it.value?.length){
+        const localIds=new Set(DB.students.map(x=>x.id));
+        DB.students=[...DB.students,...it.value.filter(x=>!localIds.has(x.id))];
+        changed=true;
+      }
+      if(it.key===_sPfx+'grades'   && it.value?.length){
+        const localIds=new Set((DB.gradeRecords||[]).map(x=>x.id));
+        DB.gradeRecords=[...(DB.gradeRecords||[]),...it.value.filter(x=>!localIds.has(x.id))];
+        changed=true;
+      }
       if(it.key===_sPfx+'settings' && it.value)        { DB.settings=it.value; changed=true; }
       if(it.key===_sPfx+'notes'    && it.value)        { DB.notes=it.value;    changed=true; }
       if(it.key==='app_users'&& it.value?.length){
@@ -7887,13 +7901,37 @@ async function _autoPullOnLogin() {
 
       /* تجاهل المفاتيح التي تعود لمدارس أخرى (تحتوي _ في الاسم بعد الحذف) */
       if (['teachers','classes','students','grades','settings','notes','records','schedule'].includes(k)) {
-        if (k === 'teachers' && it.value?.length) { DB.teachers     = it.value; changed = true; }
-        if (k === 'classes'  && it.value?.length) { DB.classes      = it.value; changed = true; }
-        if (k === 'students' && it.value?.length) { DB.students     = it.value; changed = true; }
-        if (k === 'grades'   && it.value?.length) { DB.gradeRecords = it.value; changed = true; }
+        /* دمج ذكي: نحتفظ بالبيانات المحلية الجديدة ونضيف فقط ما يغيب عنها من السحابة */
+        if (k === 'teachers' && it.value?.length) {
+          const localIds = new Set(DB.teachers.map(x=>x.id));
+          const merged = [...DB.teachers, ...it.value.filter(x=>!localIds.has(x.id))];
+          /* تحديث بيانات المعلمين الموجودين من السحابة إذا كانت السحابة أحدث */
+          it.value.forEach(sv=>{ const li=merged.findIndex(lv=>lv.id===sv.id); if(li>=0 && !localIds.has(sv.id)) merged[li]=sv; });
+          DB.teachers = merged; changed = true;
+        }
+        if (k === 'classes'  && it.value?.length) {
+          const localIds = new Set(DB.classes.map(x=>x.id));
+          DB.classes = [...DB.classes, ...it.value.filter(x=>!localIds.has(x.id))];
+          changed = true;
+        }
+        if (k === 'students' && it.value?.length) {
+          /* دمج الطلاب: أضف فقط من السحابة من ليسوا محلياً — لا تستبدل المحلي */
+          const localIds = new Set(DB.students.map(x=>x.id));
+          DB.students = [...DB.students, ...it.value.filter(x=>!localIds.has(x.id))];
+          changed = true;
+        }
+        if (k === 'grades'   && it.value?.length) {
+          const localIds = new Set((DB.gradeRecords||[]).map(x=>x.id));
+          DB.gradeRecords = [...(DB.gradeRecords||[]), ...it.value.filter(x=>!localIds.has(x.id))];
+          changed = true;
+        }
         if (k === 'settings' && it.value)         { DB.settings     = {...DB.settings, ...it.value}; changed = true; }
         if (k === 'notes'    && it.value)         { DB.notes        = it.value; changed = true; }
-        if (k === 'records'  && it.value?.length) { DB.records      = it.value; changed = true; }
+        if (k === 'records'  && it.value?.length) {
+          const localIds = new Set((DB.records||[]).map(x=>x.id));
+          DB.records = [...(DB.records||[]), ...it.value.filter(x=>!localIds.has(x.id))];
+          changed = true;
+        }
         if (k === 'schedule' && it.value)         { DB.schedule     = it.value; changed = true; }
       }
       if (it.key === 'app_users' && it.value?.length) {
