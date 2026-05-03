@@ -4639,7 +4639,7 @@ function initChoose(){
     const _lu3=getLoggedUser();
     const _lu3sid = _lu3?.school_id || CURRENT_SCHOOL_ID || null;
     const _vTeachers=((_lu3&&_lu3.role!=='superadmin')
-      ? DB.teachers.filter(t=>_lu3sid ? t.school_id===_lu3sid : false)
+      ? DB.teachers.filter(t=>_lu3sid ? (t.school_id===_lu3sid||!t.school_id) : true)
       : DB.teachers).filter(t=>{ /* استثناء المنسقين من قائمة المدرسين */
         const u=getAppUsers().find(u=>u.teacherId===t.id||u.username===t.username);
         return !u || u.role!=='coordinator';
@@ -5544,8 +5544,9 @@ function renderTeachersTable(){
     ? DB.teachers
     : DB.teachers.filter(t=> {
         const sid = lu?.school_id || CURRENT_SCHOOL_ID || null;
-        if(!sid) return false;
-        return t.school_id === sid;
+        /* وضع محلي: لا school_id — الأدمن يرى كل المعلمين */
+        if(!sid) return true;
+        return t.school_id === sid || !t.school_id;
       });
   if(!visibleTeachers.length){tbody.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--muted)">— '+T('teacher_no_teacher')+'</td></tr>';return}
   const users=getAppUsers();
@@ -5634,8 +5635,9 @@ function renderClassesTable(){
     ? DB.classes
     : DB.classes.filter(c => {
         const sid = lu?.school_id || CURRENT_SCHOOL_ID || null;
-        if(!sid) return false;
-        return c.school_id === sid;
+        /* وضع محلي: لا school_id — الأدمن يرى كل الصفوف */
+        if(!sid) return true;
+        return c.school_id === sid || !c.school_id;
       });
   if(!visibleClasses.length){tbody.innerHTML=`<tr><td colspan="5" style="text-align:center;color:var(--muted)">${T('no_classes')}</td></tr>`;return}
   tbody.innerHTML=visibleClasses.map((c,i)=>`<tr>
@@ -5656,7 +5658,7 @@ function saveStudent(){
   DB.students.push({id:uid(),name,num,classId:cid,school_id:CURRENT_SCHOOL_ID||getLoggedUser()?.school_id||null});
   persist();document.getElementById('as-name').value='';document.getElementById('as-num').value='';
   const flt=document.getElementById('filter-class-students');if(flt)flt.value=cid;
-  toggleForm('add-student-form');renderStudentsTable();toast(T('student_added'),'ok');
+  toggleForm('add-student-form');renderClassesTable();renderStudentsTable();toast(T('student_added'),'ok');
   _autoSyncToCloud();
 }
 
@@ -5676,7 +5678,7 @@ function saveBulkStudents(){
   names.forEach(name=>DB.students.push({id:uid(),name,num:'',classId:cid,school_id:CURRENT_SCHOOL_ID||getLoggedUser()?.school_id||null}));
   persist();document.getElementById('bp-names').value='';
   const flt=document.getElementById('filter-class-students');if(flt)flt.value=cid;
-  toggleForm('bulk-paste-form');renderStudentsTable();
+  toggleForm('bulk-paste-form');renderClassesTable();renderStudentsTable();
   toast(T('bulk_added')+' '+names.length+' '+T('students_lbl'),'ok');playSound('ok');
   _autoSyncToCloud();
 }
@@ -5700,7 +5702,7 @@ function renderStudentsTable(){
 function populateClassSelects(){
   const lu=getLoggedUser();
   const schoolClasses = (lu && lu.role!=='superadmin')
-    ? DB.classes.filter(c=>c.school_id===(lu.school_id||CURRENT_SCHOOL_ID||null))
+    ? DB.classes.filter(c=>{ const _sid=lu.school_id||CURRENT_SCHOOL_ID||null; return !_sid||!c.school_id||c.school_id===_sid; })
     : DB.classes;
   ['as-class','bp-class','filter-class-students'].forEach(id=>{
     const el=document.getElementById(id);if(!el)return;
@@ -5761,7 +5763,7 @@ function showGradesSetup(){
     const _vu2 = getLoggedUser();
     const _vu2sid = _vu2?.school_id || CURRENT_SCHOOL_ID || null;
     const _visT = ((_vu2 && _vu2.role!=='superadmin')
-      ? DB.teachers.filter(t=>_vu2sid ? t.school_id===_vu2sid : false)
+      ? DB.teachers.filter(t=>_vu2sid ? (t.school_id===_vu2sid||!t.school_id) : true)
       : DB.teachers).filter(function(t){ const _u=getAppUsers().find(function(u){return u.teacherId===t.id||u.username===t.username;}); return !_u||_u.role!=='coordinator'; });
     _visT.forEach(t=>{const o=document.createElement('option');o.value=t.id;o.textContent=t.name+(t.subject?' — '+t.subject:'');ts.appendChild(o)});
     ts.disabled=false;
@@ -6716,7 +6718,7 @@ function initSchedulePage(){
     const _schedLU = getLoggedUser();
     const _schedVisSid = _schedLU?.school_id || CURRENT_SCHOOL_ID || null;
     const _schedVisT = ((_schedLU && _schedLU.role!=='superadmin')
-      ? DB.teachers.filter(t=>_schedVisSid ? t.school_id===_schedVisSid : false)
+      ? DB.teachers.filter(t=>_schedVisSid ? (t.school_id===_schedVisSid||!t.school_id) : true)
       : DB.teachers).filter(function(t){ const _u=getAppUsers().find(function(u){return u.teacherId===t.id||u.username===t.username;}); return !_u||_u.role!=='coordinator'; });
     _schedVisT.forEach(t=>{
       const o = document.createElement('option');
@@ -7502,7 +7504,7 @@ function _populateDocTeacherSel(){
   const _docsLU = getLoggedUser();
   const _docsVisSid = _docsLU?.school_id || CURRENT_SCHOOL_ID || null;
   const _docsVisT = ((_docsLU && _docsLU.role!=='superadmin')
-    ? DB.teachers.filter(t=>_docsVisSid ? t.school_id===_docsVisSid : false)
+    ? DB.teachers.filter(t=>_docsVisSid ? (t.school_id===_docsVisSid||!t.school_id) : true)
     : DB.teachers).filter(function(t){ const _u=getAppUsers().find(function(u){return u.teacherId===t.id||u.username===t.username;}); return !_u||_u.role!=='coordinator'; });
   _docsVisT.forEach(t=>{
     const o = document.createElement('option');
@@ -8917,8 +8919,8 @@ function getAllowedClassIds(){
   if(u.role==='superadmin') return DB.classes.map(c=>c.id);
   if(u.role==='admin'){
     const sid = u.school_id || CURRENT_SCHOOL_ID || null;
-    if(!sid) return [];
-    return DB.classes.filter(c=>c.school_id===sid).map(c=>c.id);
+    if(!sid) return DB.classes.map(c=>c.id); /* وضع محلي */
+    return DB.classes.filter(c=>c.school_id===sid||!c.school_id).map(c=>c.id);
   }
   if(u.role==='coordinator') return getCoordinatorClassIds();
   const t = getLinkedTeacher();
@@ -8932,11 +8934,11 @@ function getVisibleClasses(){
   if(!u) return [];
   /* سوبر أدمن يرى الكل */
   if(u.role === 'superadmin') return DB.classes;
-  /* أدمن — يرى صفوف مدرسته فقط */
+  /* أدمن — يرى صفوف مدرسته، أو كل الصفوف في الوضع المحلي (بدون school_id) */
   if(u.role === 'admin'){
     const sid = u.school_id || CURRENT_SCHOOL_ID || null;
-    if(!sid) return [];
-    return DB.classes.filter(c => c.school_id === sid);
+    if(!sid) return DB.classes; /* وضع محلي: لا قيد على المدرسة */
+    return DB.classes.filter(c => c.school_id === sid || !c.school_id);
   }
   /* معلم / منسق — صفوفه المسندة فقط */
   const allowed = getAllowedClassIds();
@@ -8950,9 +8952,9 @@ function canViewTeacher(teacherId){
   if(u.role==='superadmin') return true;
   if(u.role==='admin'){
     const sid = u.school_id || CURRENT_SCHOOL_ID || null;
-    if(!sid) return false;
+    if(!sid) return true; /* وضع محلي */
     const t = DB.teachers.find(x=>x.id===teacherId);
-    return t && t.school_id === sid;
+    return t && (t.school_id === sid || !t.school_id);
   }
   if(u.role==='coordinator'){
     const myT = getLinkedTeacher();
