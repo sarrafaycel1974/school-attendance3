@@ -2257,6 +2257,12 @@ function populateRecFilters(){
   [...new Set(DB.records.map(r=>r.session.className))].forEach(n=>{const o=document.createElement('option');o.value=n;o.textContent=n;fc.appendChild(o)});
   [...new Set(DB.records.map(r=>r.session.teacherName))].forEach(n=>{const o=document.createElement('option');o.value=n;o.textContent=n;ft.appendChild(o)});
   fc.value=cv;ft.value=tv;
+  /* إخفاء فلتر المدرسين وزر مسح الكل للمعلم العادي */
+  const _lu=getLoggedUser();
+  const isTeacherRole=_lu && _lu.role==='teacher';
+  if(ft) ft.style.display=isTeacherRole?'none':'';
+  const delAllBtn=document.getElementById('rec-delete-all-btn');
+  if(delAllBtn) delAllBtn.style.display=isTeacherRole?'none':'';
 }
 
 function clearRecFilters(){
@@ -2275,10 +2281,14 @@ function renderRecords(){
   const fdFrom=document.getElementById('rec-fdate-from')?.value||'';
   const fdTo=document.getElementById('rec-fdate-to')?.value||'';
   const con=document.getElementById('rec-container');
+  /* فلترة تلقائية للمعلم: يرى سجلاته فقط */
+  const _lu=getLoggedUser();
+  const _lt=(_lu && _lu.role==='teacher')?getLinkedTeacher():null;
 
   const list=DB.records.filter(r=>
     (fc==='all'||r.session.className===fc)&&
     (ft==='all'||r.session.teacherName===ft)&&
+    (!_lt||(r.session.teacherName===_lt.name||r.session.teacherId===_lt.id||r.session.teacherUsername===_lu.username))&&
     (!fdFrom||r.session.date>=fdFrom)&&
     (!fdTo||r.session.date<=fdTo)&&
     (!q||r.session.className.includes(q)||r.session.teacherName.includes(q)||
