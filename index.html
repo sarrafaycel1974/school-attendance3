@@ -1416,39 +1416,61 @@ select option{background:var(--surface)}
       <button class="btn btn-primary btn-sm" id="adm-add-teacher-btn" onclick="toggleForm('add-teacher-form');populateTeacherFormExtras()">+ إضافة مدرس</button>
     </div>
     <div id="add-teacher-form" style="display:none;margin-bottom:1rem;padding:1rem;background:var(--surface2);border-radius:9px;border:1px solid var(--border)">
+      <!-- ── الاسم الثلاثي ── -->
       <div class="form-row">
-        <div class="fg"><label id="lbl-at-name">اسم المدرس</label><input id="at-name" placeholder="الاسم الكامل"></div>
-        <div class="fg"><label id="lbl-at-subject">التخصص / المادة</label>
+        <div class="fg">
+          <label style="font-size:.83rem;color:var(--muted);font-weight:700">👤 الاسم <span style="color:var(--danger)">*</span></label>
+          <input id="at-first-name" placeholder="الاسم الأول" autocomplete="off" oninput="atGenerateCredentials()">
+        </div>
+        <div class="fg">
+          <label style="font-size:.83rem;color:var(--muted);font-weight:700">👤 اسم الأب</label>
+          <input id="at-father-name" placeholder="اسم الأب" autocomplete="off" oninput="atGenerateCredentials()">
+        </div>
+        <div class="fg">
+          <label style="font-size:.83rem;color:var(--muted);font-weight:700">👤 اللقب <span style="color:var(--danger)">*</span></label>
+          <input id="at-last-name" placeholder="اللقب / العائلة" autocomplete="off" oninput="atGenerateCredentials()">
+        </div>
+      </div>
+      <!-- ── الرقم الوظيفي + المادة ── -->
+      <div class="form-row">
+        <div class="fg">
+          <label style="font-size:.83rem;color:var(--muted);font-weight:700">🪪 الرقم الوظيفي <span style="color:var(--danger)">*</span></label>
+          <input id="at-emp-id" placeholder="مثال: 123456" autocomplete="off" oninput="atGenerateCredentials()"
+            style="font-family:monospace;letter-spacing:.05rem">
+          <div style="font-size:.7rem;color:var(--muted);margin-top:.2rem">سيُستخدم كاسم دخول للنظام</div>
+        </div>
+        <div class="fg"><label id="lbl-at-subject">📚 المادة <span style="color:var(--danger)">*</span></label>
           <select id="at-subject">
             <option value="">— اختر المادة —</option>
-            <option>رياضيات</option>
-            <option>علوم</option>
-            <option>عربي</option>
-            <option>إنجليزية</option>
-            <option>اجتماعيات</option>
-            <option>تربية بدنية</option>
-            <option>دراما</option>
-            <option>موسيقى</option>
-            <option>لغات</option>
-            <option>فيزياء</option>
-            <option>كيمياء</option>
-            <option>فلسفة</option>
-            <option>تقنية المعلومات</option>
-            <option>الحاسوب</option>
-            <option>تربية إسلامية</option>
-            <option>فرنسية</option>
+            <option>رياضيات</option><option>علوم</option><option>عربي</option>
+            <option>إنجليزية</option><option>اجتماعيات</option><option>تربية بدنية</option>
+            <option>دراما</option><option>موسيقى</option><option>لغات</option>
+            <option>فيزياء</option><option>كيمياء</option><option>فلسفة</option>
+            <option>تقنية المعلومات</option><option>الحاسوب</option>
+            <option>تربية إسلامية</option><option>فرنسية</option>
           </select>
         </div>
       </div>
-      <div class="form-row">
-        <div class="fg"><label id="lbl-at-username">👤 اسم المستخدم (للدخول)</label><input id="at-username" placeholder="مثال: teacher1" autocomplete="off"></div>
-        <div class="fg"><label id="lbl-at-password">🔐 كلمة المرور</label>
-          <div style="position:relative">
-            <input id="at-password" type="password" placeholder="6 أحرف على الأقل" data-ph-key="adm_password_ph" autocomplete="off" style="width:100%;padding-left:2.5rem;box-sizing:border-box">
-            <button type="button" onclick="togglePassVis('at-password',this)" style="position:absolute;inset-inline-start:.65rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--muted);font-size:.95rem;padding:0">👁</button>
+      <!-- ── بيانات الدخول المولّدة ── -->
+      <div style="background:rgba(79,216,106,.06);border:1.5px solid var(--accent2);border-radius:10px;padding:.85rem 1rem;margin-bottom:.75rem">
+        <div style="font-size:.75rem;font-weight:700;color:var(--accent2);margin-bottom:.6rem">🔑 بيانات الدخول — تُولَّد تلقائياً من الرقم الوظيفي</div>
+        <div style="display:flex;gap:.75rem;flex-wrap:wrap">
+          <div style="flex:1;min-width:140px">
+            <div style="font-size:.7rem;color:var(--muted);margin-bottom:.2rem">اسم المستخدم</div>
+            <div id="at-username-preview" style="font-family:monospace;font-size:.95rem;font-weight:900;color:var(--text);background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:.4rem .7rem">—</div>
+          </div>
+          <div style="flex:1;min-width:140px">
+            <div style="font-size:.7rem;color:var(--muted);margin-bottom:.2rem">كلمة المرور الأولى</div>
+            <div id="at-password-preview" style="font-family:monospace;font-size:.95rem;font-weight:900;color:var(--warn);background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:.4rem .7rem">—</div>
           </div>
         </div>
+        <div style="font-size:.68rem;color:var(--muted);margin-top:.5rem">⚠️ سيُطلب من المعلم تغيير كلمة المرور عند أول دخول</div>
       </div>
+      <!-- ── الحقول المخفية للتوافق ── -->
+      <input id="at-name" type="hidden">
+      <input id="at-username" type="hidden" autocomplete="off">
+      <input id="at-password" type="hidden" autocomplete="off">
+      <!-- ── المنسق ── -->
       <div class="form-row">
         <div class="fg">
           <label id="lbl-at-coordinator">🤝 المنسق المسؤول (اختياري)</label>
@@ -5375,8 +5397,56 @@ function renderAdmin(){
   renderTeachersTable();renderClassesTable();renderStudentsTable();populateClassSelects();
 }
 
+/* ── توليد اليوزر والباسوورد من الرقم الوظيفي ── */
+function atGenerateCredentials() {
+  const empId    = (document.getElementById('at-emp-id')?.value || '').trim();
+  const lastName = (document.getElementById('at-last-name')?.value || '').trim();
+
+  const unPrev  = document.getElementById('at-username-preview');
+  const pwPrev  = document.getElementById('at-password-preview');
+  const unHid   = document.getElementById('at-username');
+  const pwHid   = document.getElementById('at-password');
+  const nameHid = document.getElementById('at-name');
+
+  /* اسم المعلم الكامل */
+  const first  = (document.getElementById('at-first-name')?.value  || '').trim();
+  const father = (document.getElementById('at-father-name')?.value || '').trim();
+  const last   = lastName;
+  const fullName = [first, father, last].filter(Boolean).join(' ');
+  if(nameHid) nameHid.value = fullName;
+
+  if(!empId) {
+    if(unPrev) unPrev.textContent = '—';
+    if(pwPrev) pwPrev.textContent = '—';
+    if(unHid) unHid.value = '';
+    if(pwHid) pwHid.value = '';
+    return;
+  }
+
+  /* اليوزرنايم = اللقب + الرقم الوظيفي (بدون مسافات) */
+  const lastClean = lastName.replace(/\s/g, '') || 'emp';
+  const username  = lastClean + empId;
+
+  /* الباسوورد = اليوزرنايم نفسه (يغيّره عند أول دخول) */
+  const password  = username;
+
+  if(unPrev) unPrev.textContent = username;
+  if(pwPrev) pwPrev.textContent = password;
+  if(unHid) unHid.value = username;
+  if(pwHid) pwHid.value = password;
+}
+
 function saveTeacher(){
-  const name=document.getElementById('at-name').value.trim();
+  /* قراءة الاسم من الحقول الجديدة */
+  const firstName  = (document.getElementById('at-first-name')?.value || '').trim();
+  const fatherName = (document.getElementById('at-father-name')?.value || '').trim();
+  const lastName   = (document.getElementById('at-last-name')?.value || '').trim();
+  const empId      = (document.getElementById('at-emp-id')?.value || '').trim();
+  /* إذا الحقول الجديدة فارغة، استخدم الحقل القديم at-name */
+  const _nameFromNew = [firstName, fatherName, lastName].filter(Boolean).join(' ');
+  const name = _nameFromNew || document.getElementById('at-name').value.trim();
+  if(!name && !firstName){ return toast('⚠️ أدخل اسم المعلم','err'); }
+  if(!empId){ return toast('⚠️ أدخل الرقم الوظيفي','err'); }
   if(!name)return toast(T('teacher_required'),'err');
   const uname=(document.getElementById('at-username').value||'').trim();
   const upass=(document.getElementById('at-password').value||'').trim();
@@ -5410,11 +5480,12 @@ function saveTeacher(){
     school_num:_atSchoolNum||null,
     addedBy:_adderUser?.username||'admin',
     coordinatorId:coordinatorId||null,
+    firstName:firstName||null,fatherName:fatherName||null,lastName:lastName||null,empId:empId||null,
     createdAt:new Date().toISOString()
   });
   persist();
   const _atRole = document.querySelector('input[name="at-role"]:checked')?.value || 'teacher';
-  users.push({username:uname,password:upass,role:_atRole,teacherId:tid,school_id:_effectiveSchoolId,school_num:_atSchoolNum||null,must_change_password:true,addedBy:_adderUser?.username||'admin',created_at:new Date().toISOString()});
+  users.push({username:uname,password:upass,role:_atRole,teacherId:tid,school_id:_effectiveSchoolId,school_num:_atSchoolNum||null,must_change_password:true,empId:empId||null,firstName,fatherName,lastName,fullName:name,addedBy:_adderUser?.username||'admin',created_at:new Date().toISOString()});
   saveAppUsers(users);
   /* إذا كان المدرس منسقاً → اربط تلقائياً كل معلمي نفس المادة به */
   if(_atRole === 'coordinator') {
@@ -5432,6 +5503,10 @@ function saveTeacher(){
     }
   }
   document.getElementById('at-name').value='';
+  const _toReset=['at-first-name','at-father-name','at-last-name','at-emp-id'];
+  _toReset.forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  const unPrev=document.getElementById('at-username-preview');const pwPrev=document.getElementById('at-password-preview');
+  if(unPrev)unPrev.textContent='—';if(pwPrev)pwPrev.textContent='—';
   document.getElementById('at-subject').value='';
   const _ci=document.getElementById('at-subject-custom'); if(_ci){_ci.style.display='none';_ci.value='';}
   document.getElementById('at-username').value='';
@@ -6538,6 +6613,11 @@ function _restoreLoginSession(){
     if(sess){
       const u = JSON.parse(sess);
       document.getElementById('login-screen').style.display = 'none';
+
+  /* ── فحص تغيير كلمة المرور عند أول دخول ── */
+  if(found.must_change_password) {
+    setTimeout(() => _showMustChangePassword(found), 800);
+  }
   document.querySelectorAll('.tnav-item').forEach(b=>b.classList.remove('active'));const _ld=document.getElementById('tnav-btn-dashboard');if(_ld)_ld.classList.add('active');
       document.getElementById('hdr-teacher-name').textContent = u.username;
       _updateRoleBadge(u.role);
@@ -12765,6 +12845,43 @@ function installPWA(){
 }
 <\/script>
 
+
+<!-- ════════════════════════════════════════════════════
+     مودال تغيير كلمة المرور الإجباري — أول دخول
+════════════════════════════════════════════════════ -->
+<div id="must-change-pass-overlay" style="display:none;position:fixed;inset:0;z-index:10005;background:rgba(0,0,0,.85);backdrop-filter:blur(8px);align-items:center;justify-content:center;font-family:Cairo,sans-serif;direction:rtl">
+  <div style="width:100%;max-width:400px;margin:1rem;background:#161b22;border:1.5px solid #3fb950;border-radius:18px;padding:1.75rem;box-shadow:0 24px 60px rgba(0,0,0,.8)">
+    <div style="text-align:center;margin-bottom:1.25rem">
+      <div style="font-size:2.5rem;margin-bottom:.5rem">🔐</div>
+      <div style="font-size:1.05rem;font-weight:900;color:#e6edf3">تغيير كلمة المرور</div>
+      <div style="font-size:.78rem;color:#8b949e;margin-top:.3rem">هذا أول دخول لك — يجب تعيين كلمة مرور جديدة</div>
+    </div>
+    <div style="margin-bottom:.75rem">
+      <label style="display:block;font-size:.8rem;font-weight:700;color:#8b949e;margin-bottom:.35rem">🔑 كلمة المرور الجديدة</label>
+      <div style="position:relative">
+        <input id="mcp-new-pass" type="password" placeholder="6 أحرف على الأقل"
+          style="width:100%;background:#0d1117;border:1.5px solid #30363d;border-radius:9px;color:#e6edf3;padding:.65rem 2.5rem .65rem 1rem;font-family:Cairo,sans-serif;font-size:.9rem;outline:none;transition:border .2s;box-sizing:border-box"
+          onfocus="this.style.borderColor='#3fb950'" onblur="this.style.borderColor='#30363d'">
+        <button type="button" onclick="togglePassVis('mcp-new-pass',this)" style="position:absolute;inset-inline-start:.7rem;top:50%;transform:translateY(-50%);background:none;border:none;color:#8b949e;cursor:pointer;font-size:1rem;padding:0">👁</button>
+      </div>
+    </div>
+    <div style="margin-bottom:1rem">
+      <label style="display:block;font-size:.8rem;font-weight:700;color:#8b949e;margin-bottom:.35rem">✅ تأكيد كلمة المرور</label>
+      <div style="position:relative">
+        <input id="mcp-confirm-pass" type="password" placeholder="أعد الكتابة"
+          style="width:100%;background:#0d1117;border:1.5px solid #30363d;border-radius:9px;color:#e6edf3;padding:.65rem 2.5rem .65rem 1rem;font-family:Cairo,sans-serif;font-size:.9rem;outline:none;transition:border .2s;box-sizing:border-box"
+          onfocus="this.style.borderColor='#3fb950'" onblur="this.style.borderColor='#30363d'"
+          onkeydown="if(event.key==='Enter')mcpSave()">
+        <button type="button" onclick="togglePassVis('mcp-confirm-pass',this)" style="position:absolute;inset-inline-start:.7rem;top:50%;transform:translateY(-50%);background:none;border:none;color:#8b949e;cursor:pointer;font-size:1rem;padding:0">👁</button>
+      </div>
+    </div>
+    <div id="mcp-err" style="display:none;background:#2d0f0f;border:1px solid #6e1c1c;border-radius:8px;padding:.5rem .9rem;font-size:.8rem;color:#f85149;margin-bottom:.75rem;text-align:center"></div>
+    <button onclick="mcpSave()" style="width:100%;padding:.8rem;background:linear-gradient(135deg,#3fb950,#238636);color:#fff;border:none;border-radius:10px;font-family:Cairo,sans-serif;font-size:.95rem;font-weight:900;cursor:pointer">
+      💾 حفظ كلمة المرور الجديدة
+    </button>
+  </div>
+</div>
+
 </body>
 </html>`;
 
@@ -14122,5 +14239,49 @@ function _syncFormulaBar() {
     if(tip)     tip.innerHTML = `<b id="gr-formula-base-lbl">${T('formula_base_lbl')||'📐 المعادلة الأساسية:'}</b> <span id="gr-formula-base-expr">Σ(score/max × coeff) ÷ Σ(coeff) × N</span>`;
   }
 }
+
+/* ══════════════════════════════════════════════
+   تغيير كلمة المرور الإجباري — أول دخول
+══════════════════════════════════════════════ */
+let _mcpUser = null;
+
+function _showMustChangePassword(userObj) {
+  _mcpUser = userObj;
+  document.getElementById('mcp-new-pass').value = '';
+  document.getElementById('mcp-confirm-pass').value = '';
+  document.getElementById('mcp-err').style.display = 'none';
+  document.getElementById('must-change-pass-overlay').style.display = 'flex';
+  setTimeout(() => document.getElementById('mcp-new-pass').focus(), 100);
+}
+
+async function mcpSave() {
+  const np  = (document.getElementById('mcp-new-pass').value || '').trim();
+  const cnf = (document.getElementById('mcp-confirm-pass').value || '').trim();
+  const err = document.getElementById('mcp-err');
+  err.style.display = 'none';
+  if(np.length < 6) { err.textContent = '❌ كلمة المرور يجب أن تكون 6 أحرف على الأقل'; err.style.display = 'block'; return; }
+  if(np !== cnf)    { err.textContent = '❌ كلمتا المرور لا تتطابقان'; err.style.display = 'block'; return; }
+  if(!_mcpUser)     { err.textContent = '❌ خطأ — أعد تسجيل الدخول'; err.style.display = 'block'; return; }
+  try {
+    const users = getAppUsers();
+    const idx = users.findIndex(u => u.username === _mcpUser.username);
+    if(idx !== -1) {
+      users[idx].password = np;
+      delete users[idx].must_change_password;
+      await saveAppUsers(users);
+      try {
+        const lu = getLoggedUser();
+        if(lu) { lu.password = np; delete lu.must_change_password; sessionStorage.setItem('aj_logged_user', JSON.stringify(lu)); }
+      } catch(e2){}
+    }
+    document.getElementById('must-change-pass-overlay').style.display = 'none';
+    toast('✅ تم تغيير كلمة المرور بنجاح', 'ok');
+    _mcpUser = null;
+  } catch(e) {
+    err.textContent = '❌ خطأ في الحفظ — حاول مجدداً';
+    err.style.display = 'block';
+  }
+}
+
 
 </script>
