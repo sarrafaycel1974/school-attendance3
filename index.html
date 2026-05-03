@@ -470,37 +470,40 @@ select option{background:var(--surface)}
 @keyframes period-pulse{0%,100%{transform:translateX(-50%) scale(1)}50%{transform:translateX(-50%) scale(1.04)}}
 .period-notif{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);z-index:9999;background:linear-gradient(135deg,#1a7f37,#2ea043);border:1px solid #3fb950;border-radius:14px;padding:.85rem 1.4rem;color:#fff;font-family:'Cairo',sans-serif;font-size:.92rem;font-weight:700;box-shadow:0 8px 32px rgba(0,0,0,.45);display:flex;align-items:center;gap:.75rem;max-width:360px;animation:period-pulse .6s ease 3;cursor:pointer}
 /* ── PERIOD TIMES BAR ── */
-.period-times-bar{display:flex;flex-direction:column;gap:.4rem;padding:.75rem;background:var(--surface2);border:1px solid var(--border);border-radius:10px;margin-bottom:.85rem}
+.period-times-bar{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:.5rem;padding:.75rem;background:var(--surface2);border:1px solid var(--border);border-radius:10px;margin-bottom:.85rem}
 .period-times-bar .ptb-title{grid-column:1/-1;font-size:.82rem;font-weight:700;color:var(--muted);margin-bottom:.1rem}
-.period-time-chip{display:flex;flex-direction:column;gap:5px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:.6rem .75rem;font-size:.75rem;cursor:default;transition:border .2s;min-width:130px}
+.period-time-chip{display:flex;flex-direction:column;gap:4px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:.5rem .75rem;font-size:.72rem;cursor:default;transition:border .2s}
 .period-time-chip .ptc-label{color:var(--muted);font-weight:600}
 .period-time-chip .ptc-time{color:var(--accent2);font-weight:700;font-size:.75rem}
+.period-time-chip input[type=time]{background:var(--surface2);border:1px solid var(--border);border-radius:5px;color:var(--accent2);font-weight:700;font-size:.78rem;font-family:'Cairo',sans-serif;outline:none;width:100%;cursor:pointer;padding:.2rem .4rem;box-sizing:border-box;touch-action:manipulation}
+.period-time-chip input[type=time]:focus{border-color:var(--accent);color:var(--accent)}
 .period-time-chip.has-time{border-color:var(--accent2);background:rgba(79,216,106,.06)}
-.tp-btn{background:var(--surface2);border:1px solid var(--border);border-radius:5px;color:var(--accent2);font-weight:700;font-size:.75rem;font-family:'Cairo',sans-serif;cursor:pointer;padding:.2rem .4rem;width:100%;text-align:center;transition:border-color .15s;touch-action:manipulation;user-select:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.tp-btn:hover,.tp-btn:active{border-color:var(--accent);color:var(--accent)}
-.tp-btn.empty{color:var(--muted);font-weight:400;font-size:.65rem}
-#tp-overlay{position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.6);display:flex;align-items:flex-end;justify-content:center;padding-bottom:env(keyboard-inset-height,0px)}
-#tp-box{background:var(--surface);border-top:1px solid var(--border);border-radius:20px 20px 0 0;padding:1.25rem 1.25rem 1.5rem;width:100%;max-width:400px;box-shadow:0 -12px 40px rgba(0,0,0,.5);margin-bottom:clamp(0px,30vh,220px)}
-#tp-title{font-size:.85rem;color:var(--muted);text-align:center;margin-bottom:1rem;font-weight:700;letter-spacing:.03em}
-#tp-cols{display:flex;align-items:center;gap:0;height:210px;margin:0 auto;max-width:280px}
-.tp-col{flex:1;height:210px;overflow:hidden;position:relative;border-radius:12px;background:var(--surface2);border:1px solid var(--border)}
-.tp-col::before{content:'';position:absolute;top:0;left:0;right:0;height:75px;background:linear-gradient(to bottom,var(--surface2) 20%,transparent);z-index:3;pointer-events:none;border-radius:12px 12px 0 0}
-.tp-col::after{content:'';position:absolute;bottom:0;left:0;right:0;height:75px;background:linear-gradient(to top,var(--surface2) 20%,transparent);z-index:3;pointer-events:none;border-radius:0 0 12px 12px}
-.tp-highlight{position:absolute;top:50%;transform:translateY(-50%);left:6px;right:6px;height:44px;background:rgba(88,166,255,.13);border:2px solid var(--accent);border-radius:10px;pointer-events:none;z-index:2}
-.tp-scroll{overflow-y:scroll;height:100%;scroll-snap-type:y mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch}
-.tp-scroll::-webkit-scrollbar{display:none}
-.tp-item{height:42px;line-height:42px;text-align:center;font-size:1.35rem;font-weight:700;color:var(--text);scroll-snap-align:center;cursor:pointer;font-family:'Cairo',sans-serif;user-select:none}
-.tp-item.pad{visibility:hidden;pointer-events:none}
-.tp-sep{width:28px;text-align:center;font-size:1.8rem;font-weight:900;color:var(--accent);flex-shrink:0;line-height:210px}
-#tp-ampm{display:flex;gap:.6rem;margin:.9rem 0 .4rem}
-#tp-ampm button{flex:1;padding:.5rem;border-radius:10px;border:2px solid var(--border);background:var(--surface2);color:var(--muted);font-family:'Cairo',sans-serif;font-size:.9rem;cursor:pointer;transition:all .15s;font-weight:700}
-#tp-ampm button.active{background:rgba(88,166,255,.15);border-color:var(--accent);color:var(--accent)}
-#tp-actions{display:flex;gap:.6rem;margin-top:.9rem}
-#tp-actions button{flex:1;padding:.6rem;border-radius:12px;font-family:'Cairo',sans-serif;font-size:.9rem;font-weight:700;cursor:pointer;border:1px solid transparent;transition:opacity .15s}
-#tp-ok{background:var(--accent);color:#fff;border-color:var(--accent)}
-#tp-clear{background:var(--surface2);color:var(--danger);border-color:var(--border)!important}
-#tp-cancel{background:transparent;color:var(--muted);border-color:transparent}
 @media(max-width:600px){.period-times-bar{grid-template-columns:repeat(2,1fr)}}
+
+/* ── Time Picker ── */
+.tp-backdrop{position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,.55);backdrop-filter:blur(3px)}
+.tp-popup{position:fixed;z-index:9999;background:var(--surface,#1e2632);border:1px solid var(--border,#3a4556);border-radius:18px;box-shadow:0 20px 60px rgba(0,0,0,.7);padding:1.25rem;width:280px;direction:ltr;user-select:none;font-family:'Cairo',sans-serif}
+.tp-popup .tp-header{text-align:center;font-size:.78rem;color:var(--muted);font-weight:700;margin-bottom:.9rem;direction:rtl}
+.tp-display{display:flex;align-items:center;justify-content:center;gap:.25rem;margin-bottom:1rem}
+.tp-display .tp-val{font-size:2.4rem;font-weight:900;color:var(--accent,#6cb8ff);line-height:1;min-width:60px;text-align:center;background:rgba(255,255,255,.05);border-radius:10px;padding:.25rem .4rem;cursor:pointer;transition:background .15s}
+.tp-display .tp-val:hover,.tp-display .tp-val.active{background:rgba(108,184,255,.15);color:var(--accent,#6cb8ff)}
+.tp-display .tp-sep{font-size:2rem;font-weight:900;color:var(--muted);padding:0 .1rem;line-height:1}
+.tp-scroll-wrap{display:flex;gap:.75rem;justify-content:center;margin-bottom:1rem}
+.tp-col{display:flex;flex-direction:column;align-items:center;gap:0;width:80px}
+.tp-col-label{font-size:.68rem;color:var(--muted);font-weight:700;margin-bottom:.4rem}
+.tp-col-inner{height:180px;overflow-y:scroll;scrollbar-width:none;scroll-snap-type:y mandatory;border-radius:10px;background:var(--bg,#121820);border:1px solid var(--border,#3a4556);width:100%}
+.tp-col-inner::-webkit-scrollbar{display:none}
+.tp-item{height:44px;display:flex;align-items:center;justify-content:center;font-size:1.15rem;font-weight:700;color:var(--muted);cursor:pointer;scroll-snap-align:center;transition:all .12s;border-radius:8px}
+.tp-item:hover{color:var(--text,#e6edf3);background:rgba(255,255,255,.06)}
+.tp-item.selected{color:var(--accent2,#4fd87a);font-size:1.4rem;background:rgba(79,216,106,.12)}
+.tp-actions{display:flex;gap:.6rem}
+.tp-actions button{flex:1;padding:.55rem;border-radius:9px;border:none;font-family:'Cairo',sans-serif;font-size:.88rem;font-weight:700;cursor:pointer;transition:all .15s}
+.tp-btn-ok{background:linear-gradient(135deg,var(--accent2,#4fd87a),#2ecc71);color:#0d1117}
+.tp-btn-ok:hover{opacity:.88}
+.tp-btn-cancel{background:var(--surface2,#1e2632);color:var(--muted);border:1px solid var(--border) !important}
+.tp-btn-cancel:hover{color:var(--text)}
+.tp-btn-clear{background:rgba(248,81,73,.1);color:var(--danger,#f85149);border:1px solid rgba(248,81,73,.25) !important}
+.tp-btn-clear:hover{background:rgba(248,81,73,.2)}
 @keyframes bell-ring{0%{transform:rotate(0)}15%{transform:rotate(-20deg)}30%{transform:rotate(20deg)}45%{transform:rotate(-15deg)}60%{transform:rotate(15deg)}75%{transform:rotate(-8deg)}90%{transform:rotate(8deg)}100%{transform:rotate(0)}}
 .bell-icon{display:inline-block;font-size:1.2rem}
 .bell-icon.ringing{animation:bell-ring .6s ease}
@@ -6667,10 +6670,20 @@ function getPeriodTimes(){
   try{ return JSON.parse(localStorage.getItem(PERIOD_TIMES_KEY)||'{}'); }catch(e){ return {}; }
 }
 function saveAllPeriodTimes(){
-  /* البيانات تُحفظ فوراً عند كل اختيار — هذا الزر فقط للتأكيد البصري */
+  /* تجميع كل القيم من الـ inputs الظاهرة وحفظها */
+  const wrap = document.getElementById('period-times-bar-wrap');
+  if(!wrap) return;
+  const pt = getPeriodTimes();
+  wrap.querySelectorAll('input[type=time]').forEach(inp => {
+    const key = inp.getAttribute('onchange')?.match(/'([^']+)'/)?.[1];
+    if(key) {
+      if(inp.value) pt[key] = inp.value;
+      else delete pt[key];
+    }
+  });
+  localStorage.setItem(PERIOD_TIMES_KEY, JSON.stringify(pt));
   checkPeriodAlerts();
-  const lang = document.documentElement.lang;
-  const msg = lang==='en' ? '✅ Times saved!' : lang==='fr' ? '✅ Horaires enregistrés!' : '✅ تم حفظ الأوقات!';
+  const msg = (document.documentElement.lang==='en') ? '✅ Times saved!' : (document.documentElement.lang==='fr') ? '✅ Horaires enregistrés!' : '✅ تم حفظ الأوقات!';
   toast(msg, 'ok');
 }
 
@@ -6686,255 +6699,43 @@ function renderPeriodTimesBar(){
   if(!wrap) return;
   const pt = getPeriodTimes();
   const periods = getPeriods();
-  const lang = document.documentElement.lang;
-  const fromLbl  = lang==='en' ? 'From' : lang==='fr' ? 'De'         : 'من';
-  const toLbl    = lang==='en' ? 'To'   : lang==='fr' ? 'À'          : 'إلى';
-  const saveLbl  = lang==='en' ? '💾 Save Times' : lang==='fr' ? '💾 Enregistrer' : '💾 حفظ الأوقات';
-  const titleLbl = lang==='en' ? '🕐 Period Times:' : lang==='fr' ? '🕐 Horaires:' : '🕐 أوقات الحصص:';
-  const tapLbl   = lang==='en' ? 'tap to set' : lang==='fr' ? 'appuyer' : 'اضغط';
+  const fromLbl = (document.documentElement.lang==='en') ? 'From' : (document.documentElement.lang==='fr') ? 'De' : 'من';
+  const toLbl   = (document.documentElement.lang==='en') ? 'To'   : (document.documentElement.lang==='fr') ? 'À'  : 'إلى';
+  const saveLbl = (document.documentElement.lang==='en') ? '💾 Save Times' : (document.documentElement.lang==='fr') ? '💾 Enregistrer' : '💾 حفظ الأوقات';
+  const titleLbl= (document.documentElement.lang==='en') ? '🕐 Period Times:' : (document.documentElement.lang==='fr') ? '🕐 Horaires:' : '🕐 أوقات الحصص:';
 
-  const fmtTime = v => { if(!v) return '—'; const [h,m]=v.split(':'); const hr=+h; const ap=hr>=12?'PM':'AM'; const h12=hr%12||12; return h12+':'+m+' '+ap; };
-  const buildRow = (from, to) => {
-    let row = '<div style="display:flex;gap:.4rem;align-items:center;flex-wrap:nowrap">';
-    for(let pi=from; pi<=to; pi++){
-      const p = periods[pi];
-      if(!p) continue;
-      const startVal = pt[pi+'_s']||pt[pi]||'';
-      const endVal   = pt[pi+'_e']||'';
-      const hasTime  = startVal||endVal;
-      const shortLbl = p.replace('الحصة ','ح').replace('Period ','P').replace('Séance ','S');
-      row += `<div class="period-time-chip${hasTime?' has-time':''}" style="flex:1;min-width:0">
-        <span class="ptc-label" style="display:block;text-align:center;margin-bottom:3px">${shortLbl}</span>
-        <div style="display:flex;gap:3px">
-          <button class="tp-btn${startVal?'':' empty'}" style="flex:1;font-size:.65rem;padding:.15rem .2rem" onclick="openTimePicker('${pi}_s','${startVal}',this)">${fmtTime(startVal)}</button>
-          <button class="tp-btn${endVal?'':' empty'}" style="flex:1;font-size:.65rem;padding:.15rem .2rem;border-color:var(--accent2);color:var(--accent2)" onclick="openTimePicker('${pi}_e','${endVal}',this)">${fmtTime(endVal)}</button>
-        </div>
-      </div>`;
-    }
-    row += '</div>';
-    return row;
-  };
   let html = `<div class="period-times-bar">
-    <span class="ptb-title">${titleLbl}</span>
-    ${buildRow(0,3)}
-    <div style="height:.3rem"></div>
-    ${buildRow(4,7)}
-  </div>`;
-  html += `</div><div style="margin-bottom:.75rem">
-    <button class="btn btn-success btn-sm" onclick="saveAllPeriodTimes()" style="font-size:.82rem;width:100%">${saveLbl}</button>
-  </div>`;
-  wrap.innerHTML = html;
-}
-
-/* ══════════════════════════════════════
-   Time Picker — عجلة ساعات ودقائق
-══════════════════════════════════════ */
-let _tpKey = null, _tpBtn = null;
-
-function openTimePicker(key, currentVal, btn){
-  _tpKey = key;
-  _tpBtn = btn;
-  const lang = document.documentElement.lang;
-  const okLbl    = lang==='en' ? 'Confirm' : lang==='fr' ? 'Confirmer' : 'تأكيد';
-  const clearLbl = lang==='en' ? 'Clear'   : lang==='fr' ? 'Effacer'   : 'مسح';
-  const cancelLbl= lang==='en' ? 'Cancel'  : lang==='fr' ? 'Annuler'   : 'إلغاء';
-  const amLabel  = 'AM';
-  const pmLabel  = 'PM';
-
-  /* قيمة افتراضية */
-  let initH = 8, initM = 0, initAm = true;
-  if(currentVal){
-    const [h,m] = currentVal.split(':').map(Number);
-    initAm = h < 12;
-    initH  = h % 12 || 12;
-    initM  = m;
-  }
-
-  const hours   = [12,1,2,3,4,5,6,7,8,9,10,11];
-  const minutes = [0,5,10,15,20,25,30,35,40,45,50,55];
-
-  /* padding عمود = 2 عناصر فارغة فوق وتحت حتى يمكن scroll للعنصر الأول والأخير للمنتصف */
-  const PAD = '<div class="tp-item pad" style="height:42px">&nbsp;</div><div class="tp-item pad" style="height:42px">&nbsp;</div>';
-  const buildItems = (arr, fmt) =>
-    PAD +
-    arr.map(v => `<div class="tp-item" data-val="${v}" style="height:42px">${fmt(v)}</div>`).join('') +
-    PAD;
-
-  const overlay = document.createElement('div');
-  overlay.id = 'tp-overlay';
-  overlay.innerHTML = `
-    <div id="tp-box">
-      <div id="tp-title">🕐 ${lang==='en'?'Select Time':lang==='fr'?'Choisir l\'heure':'اختر الوقت'}<span style="font-size:.7rem;color:var(--muted);display:block;margin-top:2px">${lang==='en'?'↑↓ keys • Tab to switch • Enter confirm':lang==='fr'?'↑↓ naviguer • Tab changer • Entrée confirmer':'↑↓ تحريك • Tab تبديل • Enter تأكيد'}</span></div>
-      <div id="tp-cols">
-        <div class="tp-col" id="tp-col-h">
-          <div class="tp-highlight"></div>
-          <div class="tp-scroll" id="tp-scroll-h">
-            ${buildItems(hours, v => String(v).padStart(2,'0'))}
-          </div>
+    <span class="ptb-title">${titleLbl}</span>`;
+  periods.forEach((p,pi)=>{
+    const startVal = pt[pi+'_s']||pt[pi]||'';
+    const endVal   = pt[pi+'_e']||'';
+    const hasTime  = startVal||endVal;
+    const shortLbl = p.replace('الحصة ','ح').replace('Period ','P').replace('Séance ','S');
+    html += `<div class="period-time-chip${hasTime?' has-time':''}">
+      <span class="ptc-label">${shortLbl}</span>
+      <div style="display:flex;flex-direction:column;gap:3px">
+        <div style="display:flex;align-items:center;gap:4px">
+          <span style="font-size:.65rem;color:var(--muted);min-width:18px">${fromLbl}</span>
+          <input type="time" value="${startVal}"
+            onchange="savePeriodTime('${pi}_s',this.value)"
+            style="flex:1">
         </div>
-        <div class="tp-sep">:</div>
-        <div class="tp-col" id="tp-col-m">
-          <div class="tp-highlight"></div>
-          <div class="tp-scroll" id="tp-scroll-m">
-            ${buildItems(minutes, v => String(v).padStart(2,'0'))}
-          </div>
+        <div style="display:flex;align-items:center;gap:4px">
+          <span style="font-size:.65rem;color:var(--muted);min-width:18px">${toLbl}</span>
+          <input type="time" value="${endVal}"
+            onchange="savePeriodTime('${pi}_e',this.value)"
+            style="flex:1">
         </div>
-      </div>
-      <div id="tp-ampm">
-        <button id="tp-am" class="${initAm?'active':''}" onclick="_tpSetAm(true)">${amLabel}</button>
-        <button id="tp-pm" class="${!initAm?'active':''}" onclick="_tpSetAm(false)">${pmLabel}</button>
-      </div>
-      <div id="tp-actions">
-        <button id="tp-clear"  onclick="_tpClear()">${clearLbl}</button>
-        <button id="tp-cancel" onclick="_tpClose()">${cancelLbl}</button>
-        <button id="tp-ok"     onclick="_tpConfirm()">${okLbl}</button>
       </div>
     </div>`;
-  document.body.appendChild(overlay);
-  overlay.addEventListener('click', e => { if(e.target===overlay) _tpClose(); });
-
-  /* ── Mouse drag + wheel scroll للعجلات ── */
-  setTimeout(() => {
-    ['tp-scroll-h','tp-scroll-m'].forEach(id => {
-      const el = document.getElementById(id);
-      if(!el) return;
-
-      /* Mouse wheel (ماوس عادي) */
-      el.addEventListener('wheel', e => {
-        e.preventDefault();
-        const dir = e.deltaY > 0 ? 1 : -1;
-        const cur = Math.round(el.scrollTop / 42);
-        el.scrollTo({ top: (cur + dir) * 42, behavior: 'smooth' });
-      }, { passive: false });
-
-      /* Mouse drag (سحب بالماوس) */
-      let _isDragging = false, _startY = 0, _startScroll = 0;
-      el.addEventListener('mousedown', e => {
-        _isDragging = true;
-        _startY = e.clientY;
-        _startScroll = el.scrollTop;
-        el.style.cursor = 'grabbing';
-        e.preventDefault();
-      });
-      document.addEventListener('mousemove', e => {
-        if(!_isDragging) return;
-        const dy = _startY - e.clientY;
-        el.scrollTop = _startScroll + dy;
-      });
-      document.addEventListener('mouseup', () => {
-        if(!_isDragging) return;
-        _isDragging = false;
-        el.style.cursor = 'grab';
-        /* snap إلى أقرب عنصر */
-        const idx = Math.round(el.scrollTop / 42);
-        el.scrollTo({ top: idx * 42, behavior: 'smooth' });
-      });
-      el.style.cursor = 'grab';
-    });
-  }, 120);
-
-  /* scroll إلى القيمة الافتراضية */
-  _tpScrollTo('tp-scroll-h', hours,   initH);
-  _tpScrollTo('tp-scroll-m', minutes, initM);
-
-  /* دعم لوحة المفاتيح */
-  let _tpFocus = 'h'; // h = ساعات، m = دقائق
-  const _tpKH = (e) => {
-    const hoursArr   = [12,1,2,3,4,5,6,7,8,9,10,11];
-    const minutesArr = [0,5,10,15,20,25,30,35,40,45,50,55];
-    if(e.key === 'Escape'){ _tpClose(); e.preventDefault(); return; }
-    if(e.key === 'Enter'){ _tpConfirm(); e.preventDefault(); return; }
-    if(e.key === 'Tab'){
-      _tpFocus = _tpFocus === 'h' ? 'm' : 'h';
-      /* هايلايت العمود النشط */
-      document.getElementById('tp-col-h').style.outline = _tpFocus==='h' ? '2px solid var(--accent)' : 'none';
-      document.getElementById('tp-col-m').style.outline = _tpFocus==='m' ? '2px solid var(--accent)' : 'none';
-      e.preventDefault(); return;
-    }
-    if(e.key === 'ArrowUp' || e.key === 'ArrowDown'){
-      const dir = e.key === 'ArrowUp' ? -1 : 1;
-      if(_tpFocus === 'h'){
-        const el = document.getElementById('tp-scroll-h');
-        const cur = Math.round(el.scrollTop / 42);
-        const next = Math.max(0, Math.min(cur + dir, hoursArr.length - 1));
-        el.scrollTo({top: next * 42, behavior: 'smooth'});
-      } else {
-        const el = document.getElementById('tp-scroll-m');
-        const cur = Math.round(el.scrollTop / 42);
-        const next = Math.max(0, Math.min(cur + dir, minutesArr.length - 1));
-        el.scrollTo({top: next * 42, behavior: 'smooth'});
-      }
-      e.preventDefault();
-    }
-    if(e.key === 'a' || e.key === 'A'){ _tpSetAm(true); }
-    if(e.key === 'p' || e.key === 'P'){ _tpSetAm(false); }
-  };
-  document.addEventListener('keydown', _tpKH);
-  overlay._tpKH = _tpKH;
-
-  /* هايلايت العمود النشط افتراضياً */
-  setTimeout(() => {
-    const hCol = document.getElementById('tp-col-h');
-    if(hCol) hCol.style.outline = '2px solid var(--accent)';
-    hCol.style.outlineOffset = '2px';
-    hCol.style.borderRadius = '12px';
-  }, 100);
-}
-
-function _tpScrollTo(scrollId, arr, val){
-  const el = document.getElementById(scrollId);
-  if(!el) return;
-  const idx = arr.indexOf(val);
-  if(idx < 0) return;
-  /* +2 بسبب عناصر الـ padding في البداية */
-  const top = idx * 42;
-  setTimeout(() => {
-    el.scrollTop = top;
-    setTimeout(() => { el.scrollTop = top; }, 100);
-  }, 80);
-}
-
-function _tpGetSelected(scrollId, arr){
-  const el = document.getElementById(scrollId);
-  if(!el) return arr[0];
-  const idx = Math.round(el.scrollTop / 42);
-  return arr[Math.max(0, Math.min(idx, arr.length-1))];
-}
-
-function _tpSetAm(isAm){
-  document.getElementById('tp-am').classList.toggle('active', isAm);
-  document.getElementById('tp-pm').classList.toggle('active', !isAm);
-}
-
-function _tpClose(){
-  const ov = document.getElementById('tp-overlay');
-  if(ov){
-    if(ov._tpKH) document.removeEventListener('keydown', ov._tpKH);
-    ov.remove();
-  }
-}
-
-function _tpClear(){
-  if(_tpKey) savePeriodTime(_tpKey, '');
-  _tpClose();
-}
-
-function _tpConfirm(){
-  const hours   = [12,1,2,3,4,5,6,7,8,9,10,11];
-  const minutes = [0,5,10,15,20,25,30,35,40,45,50,55];
-  const h12 = _tpGetSelected('tp-scroll-h', hours);
-  const min = _tpGetSelected('tp-scroll-m', minutes);
-  const isAm = document.getElementById('tp-am').classList.contains('active');
-  let h24 = h12 % 12 + (isAm ? 0 : 12);
-  const timeStr = String(h24).padStart(2,'0') + ':' + String(min).padStart(2,'0');
-  if(_tpKey) savePeriodTime(_tpKey, timeStr);
-  _tpClose();
-  /* إذا كانت البداية، افتح picker النهاية تلقائياً */
-  if(_tpKey && _tpKey.endsWith('_s')){
-    const endKey = _tpKey.replace('_s','_e');
-    const pt = getPeriodTimes();
-    setTimeout(() => openTimePicker(endKey, pt[endKey]||'', null), 180);
-  }
+  });
+  html += `</div>
+  <div style="margin-bottom:.75rem">
+    <button class="btn btn-success btn-sm" onclick="saveAllPeriodTimes()" style="font-size:.82rem;width:100%">
+      ${saveLbl}
+    </button>
+  </div>`;
+  wrap.innerHTML = html;
 }
 
 function renderSchedule(){
@@ -8667,6 +8468,14 @@ async function doAppLogin() {
 
   let found = null;
   let cloudReachable = false; /* هل وصلنا السحابة وجابت بيانات؟ */
+
+  /* ── 0. فحص DEFAULT_USERS أولاً — هذه الحسابات تعمل دائماً بأي ظرف ── */
+  const _defFound = DEFAULT_USERS.find(u => u.username === uname && u.password === pass);
+  if(_defFound){
+    if(loginBtn){ loginBtn.disabled=false; loginBtn.textContent='🔑 دخول'; }
+    _loginSuccess(_defFound);
+    return;
+  }
 
   /* ── 1. السحابة أولاً — مع timeout سريع ── */
   const _cloudUrlValid = GS_URL && !GS_URL.includes('***') && !GS_URL.includes('your-project');
