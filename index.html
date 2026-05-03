@@ -5389,7 +5389,7 @@ function saveTeacher(){
     return toast('⚠️ رقم المدرسة إجباري','err');
   }
   const users=getAppUsers();
-  if(users.find(u=>u.username===uname))return toast(T('teacher_user_exists2'),'err');
+  if(_usernameExistsInMySchool(users, uname))return toast(T('teacher_user_exists2'),'err');
   const tid=uid();
   const _adderUser=getLoggedUser();
   const coordinatorId=document.getElementById('at-coordinator')?.value||'';
@@ -5513,7 +5513,7 @@ async function addTeacherAccount(tid){
   const uname=prompt(`${T('user_prompt')} "${t.name}":`);
   if(!uname||!uname.trim())return;
   const users=getAppUsers();
-  if(users.find(u=>u.username===uname.trim()))return toast(T('teacher_user_exists2'),'err');
+  if(_usernameExistsInMySchool(users, uname.trim()))return toast(T('teacher_user_exists2'),'err');
   const upass=prompt(T('pass_min_chars'));
   if(!upass||upass.trim().length<6)return toast(T('pass_very_short'),'err');
   users.push({id:uid(),username:uname.trim(),password:upass.trim(),role:'teacher',teacherId:tid,school_id:CURRENT_SCHOOL_ID||null,created_at:new Date().toISOString()});
@@ -8033,6 +8033,23 @@ const DEFAULT_USERS = [
 
 const USERS_IDB_KEY = 'aj_app_users';
 
+
+/* فحص تكرار اسم المستخدم داخل نفس المدرسة فقط */
+function _usernameExistsInMySchool(users, uname, excludeTeacherId) {
+  const lu = getLoggedUser();
+  const mySid = lu?.school_id || CURRENT_SCHOOL_ID || null;
+  return users.some(u => {
+    if(u.username !== uname) return false;
+    if(excludeTeacherId && u.teacherId === excludeTeacherId) return false;
+    /* إذا مو superadmin — فقط فحص داخل نفس المدرسة */
+    if(lu?.role !== 'superadmin' && mySid) {
+      return u.school_id === mySid || u.school_id === undefined || u.school_id === null;
+    }
+    /* superadmin — فحص عالمي */
+    return true;
+  });
+}
+
 /* ═══════════════════════════════════════════════════
    طبقة المستخدمين — Supabase أولاً دائماً
    الهدف: أي تغيير يظهر فوراً على كل الأجهزة
@@ -8278,7 +8295,9 @@ async function doNewUserRegister(){
 
     /* التحقق إن اسم المستخدم غير موجود */
     const existingUsers=await _pullUsersFromCloud()||window._cachedAppUsers||[];
-    if(existingUsers.find(u=>u.username===uname)){errEl.textContent=T('new_user_err_exists');errEl.style.display='block';return;}
+    /* تحقق من اسم المستخدم داخل مستخدمي هذه المدرسة فقط */
+    const _schoolUsers = existingUsers.filter(u => u.school_id === schoolObj.school_id || u.school_id === undefined);
+    if(_schoolUsers.find(u=>u.username===uname)){errEl.textContent=T('new_user_err_exists');errEl.style.display='block';return;}
 
     /* إضافة المستخدم الجديد */
     const newUser={
@@ -8419,7 +8438,7 @@ function saveEditTeacher(){
   if(uIdx>=0){
     /* تحديث اليوزرنايم لو تغيّر */
     if(newUsername && users[uIdx].username !== newUsername){
-      if(!users.find(u=>u.username===newUsername&&u.teacherId!==_editTeacherId)){
+      if(!_usernameExistsInMySchool(users.filter(u=>u.teacherId!==_editTeacherId), newUsername)){
         users[uIdx].username=newUsername;
       } else {
         return toast(T('edit_teacher_user_exists'),'err');
@@ -9036,7 +9055,7 @@ function saveUserModal(){
   if(idx === -1){
     /* إضافة جديد */
     if(!pass){ toast('⚠️ أدخل كلمة المرور','err'); return; }
-    if(users.find(u=>u.username===uname)){ toast(T('teacher_user_exists2'),'err'); return; }
+    if(_usernameExistsInMySchool(users, uname)){ toast(T('teacher_user_exists2'),'err'); return; }
     const _adder = (()=>{ try{ return JSON.parse(sessionStorage.getItem('aj_logged_user')); }catch(e){ return null; } })();
     const _email = (document.getElementById('um-email')?.value||'').trim().toLowerCase();
     users.push({ username: uname, password: pass, role, email: _email, addedBy: _adder?.username||'admin' });
