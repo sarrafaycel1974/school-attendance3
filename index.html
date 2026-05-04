@@ -445,6 +445,31 @@ select option{background:var(--surface)}
 .upload-progress{height:4px;background:var(--accent2);width:0%;transition:width .3s;border-radius:2px;margin-top:.5rem}
 
 
+/* ── SCHEDULE CLASSES SIDEBAR ── */
+#sch-sidebar{
+  scrollbar-width:thin;
+  scrollbar-color:rgba(88,166,255,.3) transparent;
+}
+#sch-sidebar::-webkit-scrollbar{width:4px}
+#sch-sidebar::-webkit-scrollbar-thumb{background:rgba(88,166,255,.3);border-radius:999px}
+#sch-sidebar .drag-chip{
+  width:100%;
+  box-sizing:border-box;
+}
+@media(max-width:768px){
+  #sch-sidebar{
+    width:100%!important;
+    min-width:unset!important;
+    flex-direction:row!important;
+    flex-wrap:wrap!important;
+    max-height:120px!important;
+    overflow-y:auto!important;
+    position:relative!important;
+  }
+  #sch-sidebar .drag-chip{width:auto!important}
+  #page-schedule > div[style*="display:flex"]{flex-direction:column!important}
+}
+
 /* ── SCHEDULE / TIMETABLE ── */
 .sched-grid{display:grid;grid-template-columns:90px repeat(6,1fr);gap:3px;margin-top:.5rem;min-width:720px}
 .sched-header{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:.55rem .3rem;text-align:center;font-weight:700;font-size:.78rem;color:var(--accent)}
@@ -2039,12 +2064,14 @@ select option{background:var(--surface)}
       <button class="btn btn-ghost btn-sm" id="sch-clear-btn" onclick="clearSchedule()">🗑️ مسح الجدول</button>
     </div>
   </div>
-  <div style="display:grid;grid-template-columns:1fr;gap:1rem;align-items:start">
-    <!-- قائمة الصفوف مخفية — لا تأخذ مكان -->
-    <div id="sch-classes-lbl" style="display:none"></div>
-    <div id="sched-classes-list" style="display:none"></div>
+  <div style="display:flex;gap:1rem;align-items:start">
+    <!-- شريط الصفوف الجانبي -->
+    <div id="sch-sidebar" style="width:160px;min-width:140px;flex-shrink:0;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:.75rem;display:flex;flex-direction:column;gap:.5rem;position:sticky;top:0;max-height:calc(100vh - 100px);overflow-y:auto">
+      <div id="sch-classes-lbl" style="font-size:.75rem;font-weight:700;color:var(--muted);margin-bottom:.25rem;display:flex;align-items:center;gap:.3rem">🏫 <span id="sch-classes-lbl-text">الصفوف</span></div>
+      <div id="sched-classes-list" style="display:flex;flex-direction:column;gap:.4rem"></div>
+    </div>
     <!-- الجدول -->
-    <div class="card" style="padding:1rem;overflow-x:auto">
+    <div class="card" style="padding:1rem;overflow-x:auto;flex:1;min-width:0">
       <div id="period-times-bar-wrap"></div>
       <div id="schedule-grid-wrap"></div>
     </div>
@@ -3000,6 +3027,9 @@ new_user_btn:'مستخدم جديد؟',new_user_desc:'أدخل كود المدر
 show_password:'إظهار كلمة المرور',hide_password:'إخفاء كلمة المرور',
 coordinator_lbl:'🤝 المنسق المسؤول (اختياري)',coordinator_none:'— بدون منسق —',added_by_lbl:'👤 أضافه (الأدمن)',
 th_coordinator:'المنسق',th_added_by:'أضافه',no_coordinator:'—',
+um_th_username:'اسم المستخدم',um_th_password:'كلمة المرور',um_th_role:'الدور',um_th_added_by:'أضافه',um_th_link_teacher:'🔗 ربط بمعلم',um_th_actions:'إجراءات',um_no_users:'لا يوجد مستخدمون مرتبطون بحسابك',um_no_link:'— بدون ربط —',um_change_pass:'تغيير كلمة المرور',um_save:'حفظ',um_cancel:'إلغاء',
+att_th_name:'الاسم',att_th_class:'الصف',att_th_rate:'نسبة الحضور',att_th_notes:'الملاحظات',
+pdf_th_subject:'المادة / الاختبار',pdf_th_teacher:'المدرس',pdf_th_student:'اسم الطالب',pdf_th_stat:'الإحصائية',pdf_th_present:'✅ حضور',pdf_th_absent:'❌ غياب',pdf_th_late:'⚠️ تأخير',pdf_th_rate:'📊 نسبة',
 edit_teacher_title:'✏️ تعديل بيانات المدرس',edit_teacher_name:'📝 اسم المدرس',edit_teacher_subject:'📚 التخصص',edit_teacher_coordinator:'🤝 المنسق المسؤول',edit_teacher_added_by:'👤 أضافه (الأدمن)',edit_teacher_username:'🔑 اسم المستخدم (للدخول)',edit_teacher_save:'💾 حفظ التعديلات',edit_teacher_cancel:'إلغاء',edit_teacher_ok:'✅ تم تحديث بيانات المدرس',edit_teacher_user_exists:'⚠️ اسم المستخدم موجود لمدرس آخر',
 teacher_pass_changed:'✅ تم تغيير كلمة المرور على كل الأجهزة',teacher_pass_fail:'❌ فشل الحفظ — تحقق من الاتصال',teacher_account_created:'✅ تم إنشاء الحساب — يمكن الدخول من أي جهاز',teacher_account_fail:'❌ فشل الحفظ — تحقق من الاتصال',
 subj_math:'رياضيات',subj_science:'علوم',subj_arabic:'عربي',subj_english:'إنجليزية',subj_social:'اجتماعيات',subj_pe:'تربية بدنية',subj_drama:'دراما',subj_music:'موسيقى',subj_lang:'لغات',subj_physics:'فيزياء',subj_chemistry:'كيمياء',subj_philosophy:'فلسفة',subj_it:'تقنية المعلومات',subj_computer:'الحاسوب',subj_islamic:'تربية إسلامية',subj_french:'فرنسية',
@@ -3069,6 +3099,7 @@ adm_show_pass:'إظهار',adm_hide_pass:'إخفاء',
 gr_total_max_lbl:'من {n} درجة',
 upload_progress_lbl:'جاري الرفع...',
 role_coordinator:'🤝 منسق',adm_cloud_title:'☁️ التخزين السحابي',adm_logo_lbl:'🖼️ شعار المدرسة',adm_logo_export_desc:'PNG أو JPG — يظهر في رأس التصدير',gr_scale_lbl:'📊 نظام الدرجات النهائي (الدرجة الكلية)',gr_subject_lbl:'📚 اسم المادة / الاختبار',activity_log_title:'🕵️ سجل النشاط — من دخل ومتى',notif_enable_lbl:'🔔 تفعيل الإشعارات',notif_send_msg_lbl:'✉️ إرسال رسالة',role_superadmin_lbl:'👑 سوبر أدمن',role_teacher_lbl:'👨‍🏫 معلم',
+log_th_event:'الحدث',log_th_user:'المستخدم',log_th_role:'الدور',log_th_time:'الوقت',log_th_browser:'المتصفح',log_th_os:'النظام',log_th_device:'الجهاز',log_login:'✅ دخول',log_failed:'❌ محاولة فاشلة',log_logout:'🚪 خروج',log_empty:'السجل فارغ حتى الآن',log_empty_date:'لا توجد أحداث في هذا اليوم',
 teacher_user_required:'⚠️ أدخل اسم المستخدم',teacher_pass_required:'⚠️ أدخل كلمة المرور',teacher_user_exists2:'⚠️ اسم المستخدم مستخدم مسبقاً',pass_new_prompt:'أدخل كلمة المرور الجديدة',pass_min_note:'6 أحرف على الأقل',pass_too_short:'⚠️ كلمة المرور قصيرة جداً',user_prompt:'أدخل اسم المستخدم',pass_min_chars:'⚠️ كلمة المرور يجب أن تكون 6 أحرف على الأقل',pass_very_short:'⚠️ كلمة المرور قصيرة جداً',gr_rec_select_hint:'اختر سجلاً لعرض التفاصيل',no_grades_me:'لا توجد درجات مسجلة لك',autosave_grades:'💾 تم حفظ الدرجات تلقائياً',grade_exceeds:'⚠️ الدرجة تتجاوز الحد الأقصى',grade_zero:'⚠️ الدرجة صفر',no_grades:'لا توجد درجات',no_grades_student:'لا توجد درجات لهذا الطالب',mtg_loading:'⏳ جاري تحميل الاجتماع...',mtg_loading_hint:'قد يستغرق هذا بضع ثوانٍ',mtg_open_new_tab:'فتح في تبويب جديد',no_grades_recorded:'لا توجد درجات مسجلة',gr_teacher_lbl:'👨‍🏫 المعلم',gr_class_lbl:'🏫 الصف',login_failed:'❌ اسم المستخدم أو كلمة المرور غير صحيحة',logout_lbl:'خروج',
 owner_loading:'⏳ جاري التحميل...',owner_no_schools:'لا توجد مدارس — اضغط ➕ إضافة مدرسة',
 owner_active:'✅ نشط',owner_suspended:'❌ موقوف',owner_stop:'⏸ إيقاف',owner_activate:'▶ تفعيل',
@@ -3121,6 +3152,9 @@ new_user_btn:'New user?',new_user_desc:'Enter the school code given to you by th
 show_password:'Show password',hide_password:'Hide password',
 coordinator_lbl:'🤝 Coordinator (optional)',coordinator_none:'— No coordinator —',added_by_lbl:'👤 Added by (Admin)',
 th_coordinator:'Coordinator',th_added_by:'Added by',no_coordinator:'—',
+um_th_username:'Username',um_th_password:'Password',um_th_role:'Role',um_th_added_by:'Added by',um_th_link_teacher:'🔗 Link to Teacher',um_th_actions:'Actions',um_no_users:'No users linked to your account',um_no_link:'— No link —',um_change_pass:'Change Password',um_save:'Save',um_cancel:'Cancel',
+att_th_name:'Name',att_th_class:'Class',att_th_rate:'Attendance Rate',att_th_notes:'Notes',
+pdf_th_subject:'Subject / Exam',pdf_th_teacher:'Teacher',pdf_th_student:'Student Name',pdf_th_stat:'Statistic',pdf_th_present:'✅ Present',pdf_th_absent:'❌ Absent',pdf_th_late:'⚠️ Late',pdf_th_rate:'📊 Rate',
 edit_teacher_title:'✏️ Edit Teacher Details',edit_teacher_name:'📝 Teacher Name',edit_teacher_subject:'📚 Subject',edit_teacher_coordinator:'🤝 Coordinator',edit_teacher_added_by:'👤 Added by (Admin)',edit_teacher_username:'🔑 Username',edit_teacher_save:'💾 Save Changes',edit_teacher_cancel:'Cancel',edit_teacher_ok:'✅ Teacher updated successfully',edit_teacher_user_exists:'⚠️ Username already used by another teacher',
 teacher_pass_changed:'✅ Password changed across all devices',teacher_pass_fail:'❌ Save failed — check connection',teacher_account_created:'✅ Account created — can login from any device',teacher_account_fail:'❌ Save failed — check connection',
 teacher_user_required:'⚠️ Enter username',teacher_pass_required:'⚠️ Enter password',teacher_user_exists2:'⚠️ Username already exists',pass_new_prompt:'Enter new password',pass_min_note:'At least 6 characters',pass_too_short:'⚠️ Password too short',user_prompt:'Enter username',pass_min_chars:'⚠️ Password must be at least 6 characters',pass_very_short:'⚠️ Password is too short',gr_rec_select_hint:'Select a record to view details',no_grades_me:'No grades recorded for you',autosave_grades:'💾 Grades auto-saved',grade_exceeds:'⚠️ Grade exceeds maximum',grade_zero:'⚠️ Grade is zero',no_grades:'No grades',no_grades_student:'No grades for this student',mtg_loading:'⏳ Loading meeting...',mtg_loading_hint:'This may take a few seconds',mtg_open_new_tab:'Open in new tab',no_grades_recorded:'No grades recorded',
@@ -3145,7 +3179,8 @@ adm_show_pass:'Show',adm_hide_pass:'Hide',
 gr_total_max_lbl:'Out of {n} pts',
 upload_progress_lbl:'Uploading...',
 login_failed:'Failed login attempt',logout_lbl:'Logout',gr_teacher_lbl:'Select Teacher',gr_class_lbl:'Select Class',
-role_coordinator:'🤝 Coordinator',adm_cloud_title:'☁️ Cloud Storage',adm_logo_lbl:'🖼️ School Logo',adm_logo_export_desc:'PNG or JPG — shown in export header',gr_scale_lbl:'📊 Grade System (Total Score)',gr_subject_lbl:'📚 Subject / Exam Name',activity_log_title:'🕵️ Activity Log — Who logged in & when',notif_enable_lbl:'🔔 Enable Notifications',notif_send_msg_lbl:'✉️ Send Message',role_superadmin_lbl:'👑 Super Admin',role_teacher_lbl:'👨‍🏫 Teacher',gr_teacher_lbl:'👨‍🏫 Teacher',gr_class_lbl:'🏫 Class',
+role_coordinator:'🤝 Coordinator',adm_cloud_title:'☁️ Cloud Storage',adm_logo_lbl:'🖼️ School Logo',adm_logo_export_desc:'PNG or JPG — shown in export header',gr_scale_lbl:'📊 Grade System (Total Score)',gr_subject_lbl:'📚 Subject / Exam Name',activity_log_title:'🕵️ Activity Log — Who logged in & when',notif_enable_lbl:'🔔 Enable Notifications',notif_send_msg_lbl:'✉️ Send Message',role_superadmin_lbl:'👑 Super Admin',role_teacher_lbl:'👨‍🏫 Teacher',
+log_th_event:'Event',log_th_user:'User',log_th_role:'Role',log_th_time:'Time',log_th_browser:'Browser',log_th_os:'OS',log_th_device:'Device',log_login:'✅ Login',log_failed:'❌ Failed attempt',log_logout:'🚪 Logout',log_empty:'Activity log is empty',log_empty_date:'No events on this date',gr_teacher_lbl:'👨‍🏫 Teacher',gr_class_lbl:'🏫 Class',
 mtg_no_meetings:'No meetings',mtg_no_upcoming:'No upcoming meetings',mtg_no_live:'No live meetings now',mtg_no_past:'No past meetings',
 mtg_live_now:'Live Now',mtg_upcoming:'Upcoming',mtg_ended:'Ended',
 mtg_minute:'minute',mtg_hour:'hour and',mtg_starts_in:'Starts in',
@@ -3260,6 +3295,9 @@ new_user_btn:'Nouvel utilisateur ?',new_user_desc:'Entrez le code de l\'école d
 show_password:'Afficher le mot de passe',hide_password:'Masquer le mot de passe',
 coordinator_lbl:'🤝 Coordinateur (facultatif)',coordinator_none:'— Sans coordinateur —',added_by_lbl:'👤 Ajouté par (Admin)',
 th_coordinator:'Coordinateur',th_added_by:'Ajouté par',no_coordinator:'—',
+um_th_username:"Nom d'utilisateur",um_th_password:'Mot de passe',um_th_role:'Rôle',um_th_added_by:'Ajouté par',um_th_link_teacher:'🔗 Lier à enseignant',um_th_actions:'Actions',um_no_users:'Aucun utilisateur lié à votre compte',um_no_link:'— Sans lien —',um_change_pass:'Changer mot de passe',um_save:'Enregistrer',um_cancel:'Annuler',
+att_th_name:'Nom',att_th_class:'Classe',att_th_rate:'Taux de présence',att_th_notes:'Notes',
+pdf_th_subject:'Matière / Examen',pdf_th_teacher:'Enseignant',pdf_th_student:"Nom de l'élève",pdf_th_stat:'Statistique',pdf_th_present:'✅ Présent',pdf_th_absent:'❌ Absent',pdf_th_late:'⚠️ En retard',pdf_th_rate:'📊 Taux',
 edit_teacher_title:'✏️ Modifier les données de l\'enseignant',edit_teacher_name:'📝 Nom de l\'enseignant',edit_teacher_subject:'📚 Matière',edit_teacher_coordinator:'🤝 Coordinateur',edit_teacher_added_by:'👤 Ajouté par (Admin)',edit_teacher_username:'🔑 Nom d\'utilisateur',edit_teacher_save:'💾 Enregistrer les modifications',edit_teacher_cancel:'Annuler',edit_teacher_ok:'✅ Enseignant mis à jour avec succès',edit_teacher_user_exists:'⚠️ Nom d\'utilisateur déjà utilisé par un autre enseignant',
 teacher_pass_changed:'✅ Mot de passe modifié sur tous les appareils',teacher_pass_fail:'❌ Échec de l\'enregistrement — vérifiez la connexion',teacher_account_created:'✅ Compte créé — connexion possible depuis n\'importe quel appareil',teacher_account_fail:'❌ Échec de l\'enregistrement — vérifiez la connexion',
 teacher_user_required:'⚠️ Entrez le nom d\'utilisateur',teacher_pass_required:'⚠️ Entrez le mot de passe',teacher_user_exists2:'⚠️ Nom d\'utilisateur déjà utilisé',pass_new_prompt:'Entrez le nouveau mot de passe',pass_min_note:'Au moins 6 caractères',pass_too_short:'⚠️ Mot de passe trop court',user_prompt:'Entrez le nom d\'utilisateur',pass_min_chars:'⚠️ Le mot de passe doit contenir au moins 6 caractères',pass_very_short:'⚠️ Mot de passe trop court',gr_rec_select_hint:'Sélectionnez un enregistrement',no_grades_me:'Aucune note enregistrée pour vous',autosave_grades:'💾 Notes sauvegardées automatiquement',grade_exceeds:'⚠️ La note dépasse le maximum',grade_zero:'⚠️ La note est zéro',no_grades:'Aucune note',no_grades_student:'Aucune note pour cet élève',mtg_loading:'⏳ Chargement de la réunion...',mtg_loading_hint:'Cela peut prendre quelques secondes',mtg_open_new_tab:'Ouvrir dans un nouvel onglet',no_grades_recorded:'Aucune note enregistrée',
@@ -3285,6 +3323,7 @@ gr_total_max_lbl:'Sur {n} pts',
 upload_progress_lbl:'Téléchargement...',
 login_failed:'Tentative de connexion échouée',logout_lbl:'Déconnexion',gr_teacher_lbl:'Choisir l\'enseignant',gr_class_lbl:'Choisir la classe',
 role_coordinator:'🤝 Coordinateur',adm_cloud_title:'☁️ Stockage cloud',adm_logo_lbl:'🖼️ Logo de l\'école',adm_logo_export_desc:'PNG ou JPG — affiché dans les exports',gr_scale_lbl:'📊 Système de notation (note totale)',gr_subject_lbl:'📚 Matière / Examen',activity_log_title:'🕵️ Journal d\'activité — Qui s\'est connecté et quand',notif_enable_lbl:'🔔 Activer les notifications',notif_send_msg_lbl:'✉️ Envoyer un message',role_superadmin_lbl:'👑 Super Admin',role_teacher_lbl:'👨‍🏫 Enseignant',gr_teacher_lbl:'👨‍🏫 Enseignant',gr_class_lbl:'🏫 Classe',
+log_th_event:'Événement',log_th_user:'Utilisateur',log_th_role:'Rôle',log_th_time:'Heure',log_th_browser:'Navigateur',log_th_os:'Système',log_th_device:'Appareil',log_login:'✅ Connexion',log_failed:'❌ Tentative échouée',log_logout:'🚪 Déconnexion',log_empty:'Journal vide pour l\'instant',log_empty_date:'Aucun événement ce jour',
 mtg_no_meetings:'Aucune réunion',mtg_no_upcoming:'Aucune réunion à venir',mtg_no_live:'Aucune réunion en cours',mtg_no_past:'Aucune réunion passée',
 mtg_live_now:'En direct',mtg_upcoming:'À venir',mtg_ended:'Terminé',
 mtg_minute:'minute',mtg_hour:'heure et',mtg_starts_in:'Commence dans',
@@ -4388,13 +4427,13 @@ function renderStudentProfiles(){
   if(!stus.length){con.innerHTML=`<div class="empty"><div class="ei">👤</div>${T('no_students')}</div>`;return;}
 
   con.innerHTML=`
-    <div style="font-size:.75rem;color:var(--muted);margin-bottom:.65rem;padding:0 .25rem">${stus.length} طالب</div>
+    <div style="font-size:.75rem;color:var(--muted);margin-bottom:.65rem;padding:0 .25rem">${stus.length} ${T('students_lbl')||'طالب'}</div>
     <table class="data-table" style="font-size:.82rem">
       <thead>
         <tr>
           <th style="width:32px">#</th>
-          <th style="text-align:right">الاسم</th>
-          <th>الصف</th>
+          <th style="text-align:right">${T('att_th_name')}</th>
+          <th>${T('att_th_class')}</th>
           <th>✅</th>
           <th>❌</th>
           <th>⚠️</th>
@@ -4496,11 +4535,11 @@ function showStudentProfile(stuId){
       <table style="width:100%;border-collapse:collapse;font-size:.82rem;min-width:340px">
         <thead>
           <tr>
-            <th style="background:var(--surface2);border:1px solid var(--border);padding:.5rem .7rem;text-align:right;color:var(--muted);font-size:.72rem">الإحصائية</th>
-            <th style="background:var(--p-bg);border:1px solid var(--p-border);padding:.5rem .7rem;text-align:center;color:var(--accent2);font-size:.72rem">✅ حضور</th>
-            <th style="background:var(--a-bg);border:1px solid var(--a-border);padding:.5rem .7rem;text-align:center;color:var(--danger);font-size:.72rem">❌ غياب</th>
-            <th style="background:var(--l-bg);border:1px solid var(--l-border);padding:.5rem .7rem;text-align:center;color:var(--warn);font-size:.72rem">⚠️ تأخير</th>
-            <th style="background:var(--surface2);border:1px solid var(--border);padding:.5rem .7rem;text-align:center;color:var(--muted);font-size:.72rem">📊 نسبة</th>
+            <th style="background:var(--surface2);border:1px solid var(--border);padding:.5rem .7rem;text-align:right;color:var(--muted);font-size:.72rem">${T('pdf_th_stat')}</th>
+            <th style="background:var(--p-bg);border:1px solid var(--p-border);padding:.5rem .7rem;text-align:center;color:var(--accent2);font-size:.72rem">${T('pdf_th_present')}</th>
+            <th style="background:var(--a-bg);border:1px solid var(--a-border);padding:.5rem .7rem;text-align:center;color:var(--danger);font-size:.72rem">${T('pdf_th_absent')}</th>
+            <th style="background:var(--l-bg);border:1px solid var(--l-border);padding:.5rem .7rem;text-align:center;color:var(--warn);font-size:.72rem">${T('pdf_th_late')}</th>
+            <th style="background:var(--surface2);border:1px solid var(--border);padding:.5rem .7rem;text-align:center;color:var(--muted);font-size:.72rem">${T('pdf_th_rate')}</th>
             ${gradeHeaders}
           </tr>
         </thead>
@@ -4639,7 +4678,7 @@ function initChoose(){
     const _lu3=getLoggedUser();
     const _lu3sid = _lu3?.school_id || CURRENT_SCHOOL_ID || null;
     const _vTeachers=((_lu3&&_lu3.role!=='superadmin')
-      ? DB.teachers.filter(t=>_lu3sid ? (t.school_id===_lu3sid||!t.school_id) : true)
+      ? DB.teachers.filter(t=>_lu3sid ? t.school_id===_lu3sid : false)
       : DB.teachers).filter(t=>{ /* استثناء المنسقين من قائمة المدرسين */
         const u=getAppUsers().find(u=>u.teacherId===t.id||u.username===t.username);
         return !u || u.role!=='coordinator';
@@ -5062,8 +5101,7 @@ function populateRecFilters(){
   ft.innerHTML=`<option value="all">${T('rec_all_teachers')}</option>`;
   const _pfLinkedT=getLinkedTeacher();
   const _pfLoggedU=getLoggedUser();
-  const _isTeacherRole = _pfLoggedU && _pfLoggedU.role==='teacher';
-  /* تحديد السجلات المرئية: معلم → سجلاته فقط، أدمن/منسق/سوبرأدمن → مدرسته/الكل */
+  /* تحديد السجلات المرئية: معلم → سجلاته فقط، أدمن → مدرسته فقط، سوبرأدمن → الكل */
   const _visClassIds7 = getVisibleClasses().map(c=>c.id);
   const visibleRecs=shouldFilterByTeacher()
     ? DB.records.filter(r=>{
@@ -5074,10 +5112,6 @@ function populateRecFilters(){
   [...new Set(visibleRecs.map(r=>r.session.className))].forEach(n=>{const o=document.createElement('option');o.value=n;o.textContent=n;fc.appendChild(o)});
   [...new Set(visibleRecs.map(r=>r.session.teacherName))].forEach(n=>{const o=document.createElement('option');o.value=n;o.textContent=n;ft.appendChild(o)});
   fc.value=cv;ft.value=tv;
-  /* إخفاء قائمة المدرسين وزر مسح الكل للمعلم العادي فقط */
-  if(ft) ft.style.display = _isTeacherRole ? 'none' : '';
-  const delAllBtn=document.getElementById('rec-delete-all-btn');
-  if(delAllBtn) delAllBtn.style.display = _isTeacherRole ? 'none' : '';
 }
 
 function clearRecFilters(){
@@ -5544,9 +5578,8 @@ function renderTeachersTable(){
     ? DB.teachers
     : DB.teachers.filter(t=> {
         const sid = lu?.school_id || CURRENT_SCHOOL_ID || null;
-        /* وضع محلي: لا school_id — الأدمن يرى كل المعلمين */
-        if(!sid) return true;
-        return t.school_id === sid || !t.school_id;
+        if(!sid) return false;
+        return t.school_id === sid;
       });
   if(!visibleTeachers.length){tbody.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--muted)">— '+T('teacher_no_teacher')+'</td></tr>';return}
   const users=getAppUsers();
@@ -5635,9 +5668,8 @@ function renderClassesTable(){
     ? DB.classes
     : DB.classes.filter(c => {
         const sid = lu?.school_id || CURRENT_SCHOOL_ID || null;
-        /* وضع محلي: لا school_id — الأدمن يرى كل الصفوف */
-        if(!sid) return true;
-        return c.school_id === sid || !c.school_id;
+        if(!sid) return false;
+        return c.school_id === sid;
       });
   if(!visibleClasses.length){tbody.innerHTML=`<tr><td colspan="5" style="text-align:center;color:var(--muted)">${T('no_classes')}</td></tr>`;return}
   tbody.innerHTML=visibleClasses.map((c,i)=>`<tr>
@@ -5658,7 +5690,7 @@ function saveStudent(){
   DB.students.push({id:uid(),name,num,classId:cid,school_id:CURRENT_SCHOOL_ID||getLoggedUser()?.school_id||null});
   persist();document.getElementById('as-name').value='';document.getElementById('as-num').value='';
   const flt=document.getElementById('filter-class-students');if(flt)flt.value=cid;
-  toggleForm('add-student-form');renderClassesTable();renderStudentsTable();toast(T('student_added'),'ok');
+  toggleForm('add-student-form');renderStudentsTable();toast(T('student_added'),'ok');
   _autoSyncToCloud();
 }
 
@@ -5678,7 +5710,7 @@ function saveBulkStudents(){
   names.forEach(name=>DB.students.push({id:uid(),name,num:'',classId:cid,school_id:CURRENT_SCHOOL_ID||getLoggedUser()?.school_id||null}));
   persist();document.getElementById('bp-names').value='';
   const flt=document.getElementById('filter-class-students');if(flt)flt.value=cid;
-  toggleForm('bulk-paste-form');renderClassesTable();renderStudentsTable();
+  toggleForm('bulk-paste-form');renderStudentsTable();
   toast(T('bulk_added')+' '+names.length+' '+T('students_lbl'),'ok');playSound('ok');
   _autoSyncToCloud();
 }
@@ -5702,7 +5734,7 @@ function renderStudentsTable(){
 function populateClassSelects(){
   const lu=getLoggedUser();
   const schoolClasses = (lu && lu.role!=='superadmin')
-    ? DB.classes.filter(c=>{ const _sid=lu.school_id||CURRENT_SCHOOL_ID||null; return !_sid||!c.school_id||c.school_id===_sid; })
+    ? DB.classes.filter(c=>c.school_id===(lu.school_id||CURRENT_SCHOOL_ID||null))
     : DB.classes;
   ['as-class','bp-class','filter-class-students'].forEach(id=>{
     const el=document.getElementById(id);if(!el)return;
@@ -5763,7 +5795,7 @@ function showGradesSetup(){
     const _vu2 = getLoggedUser();
     const _vu2sid = _vu2?.school_id || CURRENT_SCHOOL_ID || null;
     const _visT = ((_vu2 && _vu2.role!=='superadmin')
-      ? DB.teachers.filter(t=>_vu2sid ? (t.school_id===_vu2sid||!t.school_id) : true)
+      ? DB.teachers.filter(t=>_vu2sid ? t.school_id===_vu2sid : false)
       : DB.teachers).filter(function(t){ const _u=getAppUsers().find(function(u){return u.teacherId===t.id||u.username===t.username;}); return !_u||_u.role!=='coordinator'; });
     _visT.forEach(t=>{const o=document.createElement('option');o.value=t.id;o.textContent=t.name+(t.subject?' — '+t.subject:'');ts.appendChild(o)});
     ts.disabled=false;
@@ -6718,7 +6750,7 @@ function initSchedulePage(){
     const _schedLU = getLoggedUser();
     const _schedVisSid = _schedLU?.school_id || CURRENT_SCHOOL_ID || null;
     const _schedVisT = ((_schedLU && _schedLU.role!=='superadmin')
-      ? DB.teachers.filter(t=>_schedVisSid ? (t.school_id===_schedVisSid||!t.school_id) : true)
+      ? DB.teachers.filter(t=>_schedVisSid ? t.school_id===_schedVisSid : false)
       : DB.teachers).filter(function(t){ const _u=getAppUsers().find(function(u){return u.teacherId===t.id||u.username===t.username;}); return !_u||_u.role!=='coordinator'; });
     _schedVisT.forEach(t=>{
       const o = document.createElement('option');
@@ -6734,6 +6766,9 @@ function initSchedulePage(){
 function renderSchedClasses(){
   const con = document.getElementById('sched-classes-list');
   if(!con) return;
+  // Update sidebar label
+  const lblEl = document.getElementById('sch-classes-lbl-text');
+  if(lblEl) lblEl.textContent = T('sch_classes')||'🏫 الصفوف';
   if(!DB.classes.length){
     con.innerHTML=`<div style="font-size:.75rem;color:var(--muted)">${T('no_classes_add')}</div>`;
     return;
@@ -6788,7 +6823,6 @@ function renderPeriodTimesBar(){
   const periods = getPeriods();
   const fromLbl = (document.documentElement.lang==='en') ? 'From' : (document.documentElement.lang==='fr') ? 'De' : 'من';
   const toLbl   = (document.documentElement.lang==='en') ? 'To'   : (document.documentElement.lang==='fr') ? 'À'  : 'إلى';
-  const saveLbl = (document.documentElement.lang==='en') ? '💾 Save Times' : (document.documentElement.lang==='fr') ? '💾 Enregistrer' : '💾 حفظ الأوقات';
   const titleLbl= (document.documentElement.lang==='en') ? '🕐 Period Times:' : (document.documentElement.lang==='fr') ? '🕐 Horaires:' : '🕐 أوقات الحصص:';
 
   let html = `<div class="period-times-bar">
@@ -6798,31 +6832,142 @@ function renderPeriodTimesBar(){
     const endVal   = pt[pi+'_e']||'';
     const hasTime  = startVal||endVal;
     const shortLbl = p.replace('الحصة ','ح').replace('Period ','P').replace('Séance ','S');
-    html += `<div class="period-time-chip${hasTime?' has-time':''}">
+    const fmtTime = v => v ? v.replace(/^0/,'') : '--:--';
+    html += `<div class="period-time-chip${hasTime?' has-time':''}" id="ptc-${pi}">
       <span class="ptc-label">${shortLbl}</span>
       <div style="display:flex;flex-direction:column;gap:3px">
         <div style="display:flex;align-items:center;gap:4px">
           <span style="font-size:.65rem;color:var(--muted);min-width:18px">${fromLbl}</span>
-          <input type="time" value="${startVal}"
-            onchange="savePeriodTime('${pi}_s',this.value)"
-            style="flex:1">
+          <button onclick="openScrollTimePicker('${pi}_s','${startVal}','ptc-${pi}')"
+            style="flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:5px;color:var(--accent2);font-weight:700;font-size:.82rem;font-family:'Cairo',sans-serif;cursor:pointer;padding:.25rem .4rem;text-align:center;transition:all .15s"
+            onmouseenter="this.style.borderColor='var(--accent)'" onmouseleave="this.style.borderColor='var(--border)'"
+            id="tp-btn-${pi}_s">${startVal||'--:--'}</button>
         </div>
         <div style="display:flex;align-items:center;gap:4px">
           <span style="font-size:.65rem;color:var(--muted);min-width:18px">${toLbl}</span>
-          <input type="time" value="${endVal}"
-            onchange="savePeriodTime('${pi}_e',this.value)"
-            style="flex:1">
+          <button onclick="openScrollTimePicker('${pi}_e','${endVal}','ptc-${pi}')"
+            style="flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:5px;color:var(--accent2);font-weight:700;font-size:.82rem;font-family:'Cairo',sans-serif;cursor:pointer;padding:.25rem .4rem;text-align:center;transition:all .15s"
+            onmouseenter="this.style.borderColor='var(--accent)'" onmouseleave="this.style.borderColor='var(--border)'"
+            id="tp-btn-${pi}_e">${endVal||'--:--'}</button>
         </div>
       </div>
     </div>`;
   });
-  html += `</div>
-  <div style="margin-bottom:.75rem">
-    <button class="btn btn-success btn-sm" onclick="saveAllPeriodTimes()" style="font-size:.82rem;width:100%">
-      ${saveLbl}
-    </button>
-  </div>`;
+  html += `</div>`;
   wrap.innerHTML = html;
+}
+
+/* ══ SCROLL TIME PICKER ══ */
+let _tpKey = null, _tpChipId = null, _tpH = 7, _tpM = 0;
+
+function openScrollTimePicker(key, curVal, chipId){
+  _tpKey = key; _tpChipId = chipId;
+  if(curVal && curVal.includes(':')){
+    const [h,m] = curVal.split(':').map(Number);
+    _tpH = h; _tpM = m;
+  } else {
+    _tpH = 7; _tpM = 0;
+  }
+  const lang = document.documentElement.lang;
+  const isFrom = key.endsWith('_s');
+  const pi = key.replace('_s','').replace('_e','');
+  const periods = getPeriods();
+  const pLabel = periods[parseInt(pi)] || '';
+  const headerLbl = lang==='en' ? `Period ${parseInt(pi)+1} — ${isFrom?'Start':'End'}` : lang==='fr' ? `Séance ${parseInt(pi)+1} — ${isFrom?'Début':'Fin'}` : `${pLabel} — ${isFrom?'من':'إلى'}`;
+  const okLbl = lang==='en'?'✔ Save':lang==='fr'?'✔ Enregistrer':'✔ حفظ';
+  const clearLbl = lang==='en'?'🗑 Clear':lang==='fr'?'🗑 Effacer':'🗑 مسح';
+  const cancelLbl = lang==='en'?'إلغاء':lang==='fr'?'Annuler':'إلغاء';
+  const hourLbl = lang==='en'?'H':lang==='fr'?'H':'س';
+  const minLbl = lang==='en'?'M':lang==='fr'?'M':'د';
+
+  // Remove existing picker
+  document.getElementById('_tpBackdrop')?.remove();
+  document.getElementById('_tpPopup')?.remove();
+
+  const backdrop = document.createElement('div');
+  backdrop.id = '_tpBackdrop'; backdrop.className = 'tp-backdrop';
+  backdrop.onclick = () => closeScrollTimePicker(false);
+  document.body.appendChild(backdrop);
+
+  const hours = Array.from({length:24},(_,i)=>i);
+  const mins  = [0,5,10,15,20,25,30,35,40,45,50,55];
+
+  const popup = document.createElement('div');
+  popup.id = '_tpPopup'; popup.className = 'tp-popup';
+  popup.style.top='50%'; popup.style.left='50%'; popup.style.transform='translate(-50%,-50%)';
+  popup.innerHTML = `
+    <div class="tp-header">${headerLbl}</div>
+    <div class="tp-display">
+      <div class="tp-val" id="_tpHDisplay" onclick="_tpFocusCol('h')">${String(_tpH).padStart(2,'0')}</div>
+      <div class="tp-sep">:</div>
+      <div class="tp-val" id="_tpMDisplay" onclick="_tpFocusCol('m')">${String(_tpM).padStart(2,'0')}</div>
+    </div>
+    <div class="tp-scroll-wrap">
+      <div class="tp-col">
+        <div class="tp-col-label">${hourLbl}</div>
+        <div class="tp-col-inner" id="_tpHCol">
+          ${hours.map(h=>`<div class="tp-item${h===_tpH?' selected':''}" onclick="_tpSelH(${h})">${String(h).padStart(2,'0')}</div>`).join('')}
+        </div>
+      </div>
+      <div class="tp-col">
+        <div class="tp-col-label">${minLbl}</div>
+        <div class="tp-col-inner" id="_tpMCol">
+          ${mins.map(m=>`<div class="tp-item${m===_tpM?' selected':''}" onclick="_tpSelM(${m})">${String(m).padStart(2,'0')}</div>`).join('')}
+        </div>
+      </div>
+    </div>
+    <div class="tp-actions">
+      <button class="tp-btn-ok" onclick="closeScrollTimePicker(true)">${okLbl}</button>
+      <button class="tp-btn-clear" onclick="closeScrollTimePicker('clear')">${clearLbl}</button>
+      <button class="tp-btn-cancel" onclick="closeScrollTimePicker(false)">${cancelLbl}</button>
+    </div>`;
+  document.body.appendChild(popup);
+
+  // Scroll to selected
+  setTimeout(()=>{
+    const hCol = document.getElementById('_tpHCol');
+    const mCol = document.getElementById('_tpMCol');
+    if(hCol){
+      const selH = hCol.querySelector('.selected');
+      if(selH) hCol.scrollTop = selH.offsetTop - hCol.clientHeight/2 + selH.clientHeight/2;
+    }
+    if(mCol){
+      const selM = mCol.querySelector('.selected');
+      if(selM) mCol.scrollTop = selM.offsetTop - mCol.clientHeight/2 + selM.clientHeight/2;
+    }
+  },50);
+}
+
+function _tpSelH(h){
+  _tpH=h;
+  document.getElementById('_tpHDisplay').textContent=String(h).padStart(2,'0');
+  document.querySelectorAll('#_tpHCol .tp-item').forEach(el=>el.classList.toggle('selected',parseInt(el.textContent)===h));
+}
+function _tpSelM(m){
+  _tpM=m;
+  document.getElementById('_tpMDisplay').textContent=String(m).padStart(2,'0');
+  document.querySelectorAll('#_tpMCol .tp-item').forEach(el=>el.classList.toggle('selected',parseInt(el.textContent)===m));
+}
+function _tpFocusCol(col){
+  const colEl = document.getElementById(col==='h'?'_tpHCol':'_tpMCol');
+  if(colEl) colEl.style.borderColor='var(--accent)';
+}
+
+function closeScrollTimePicker(save){
+  document.getElementById('_tpBackdrop')?.remove();
+  document.getElementById('_tpPopup')?.remove();
+  if(!_tpKey) return;
+  if(save===true){
+    const val = String(_tpH).padStart(2,'0')+':'+String(_tpM).padStart(2,'0');
+    savePeriodTime(_tpKey, val);
+    const btn = document.getElementById('tp-btn-'+_tpKey);
+    if(btn) btn.textContent = val;
+  } else if(save==='clear'){
+    savePeriodTime(_tpKey, '');
+    const btn = document.getElementById('tp-btn-'+_tpKey);
+    if(btn) btn.textContent = '--:--';
+  }
+  _tpKey=null; _tpChipId=null;
 }
 
 function renderSchedule(){
@@ -7504,7 +7649,7 @@ function _populateDocTeacherSel(){
   const _docsLU = getLoggedUser();
   const _docsVisSid = _docsLU?.school_id || CURRENT_SCHOOL_ID || null;
   const _docsVisT = ((_docsLU && _docsLU.role!=='superadmin')
-    ? DB.teachers.filter(t=>_docsVisSid ? (t.school_id===_docsVisSid||!t.school_id) : true)
+    ? DB.teachers.filter(t=>_docsVisSid ? t.school_id===_docsVisSid : false)
     : DB.teachers).filter(function(t){ const _u=getAppUsers().find(function(u){return u.teacherId===t.id||u.username===t.username;}); return !_u||_u.role!=='coordinator'; });
   _docsVisT.forEach(t=>{
     const o = document.createElement('option');
@@ -8112,11 +8257,18 @@ async function gsSyncAuto(){
 })();
 
 const DEFAULT_USERS = [
-  { username: 'admin',       password: '1234',     role: 'admin' },
-  { username: 'teacher',     password: '1234',     role: 'teacher' },
-  { username: 'Faycelabidi', password: '10121974', role: 'admin' },
-  { username: 'sand',        password: '090919',   role: 'superadmin' }
+  { username: 'sanad',        password: '123456',  role: 'superadmin' },
+  { username: 'Faycelabidi',  password: '10121974', role: 'superadmin' },
+  { username: 'admin',        password: '1234',    role: 'admin' },
+  { username: 'teacher',      password: '1234',    role: 'teacher' }
 ];
+
+/* ══ مالكو التطبيق — دورهم محمي ولا يمكن تغييره أبداً ══ */
+const PROTECTED_OWNERS = ['sanad', 'Faycelabidi'];
+
+function _isProtectedOwner(username) {
+  return PROTECTED_OWNERS.some(o => o.toLowerCase() === (username||'').toLowerCase());
+}
 
 const USERS_IDB_KEY = 'aj_app_users';
 
@@ -8170,16 +8322,26 @@ async function _upsertUsersCloud(users) {
 
 /* الحفظ الرئيسي — Supabase أولاً ثم الكاش */
 async function saveAppUsers(users) {
+  /* حماية مالكي التطبيق — لا يمكن تغيير دورهم أو حذفهم */
+  const safeUsers = Array.isArray(users) ? users.map(u => {
+    if (_isProtectedOwner(u.username)) return { ...u, role: 'superadmin' };
+    return u;
+  }) : users;
+  /* ضمان وجودهم دائماً */
+  PROTECTED_OWNERS.forEach(owner => {
+    const def = DEFAULT_USERS.find(d => d.username === owner);
+    if (def && !safeUsers.find(u => u.username === owner)) safeUsers.unshift(def);
+  });
   /* 1. ارفع لـ Supabase فوراً */
   try {
-    await _upsertUsersCloud(users);
+    await _upsertUsersCloud(safeUsers);
   } catch(e) {
     console.warn('[saveAppUsers] cloud failed, saving locally only:', e);
     toast(T('cloud_save_warn'),'err');
   }
   /* 2. حدّث الكاش والـ IDB */
-  window._cachedAppUsers = users;
-  await _idbSet(USERS_IDB_KEY, users);
+  window._cachedAppUsers = safeUsers;
+  await _idbSet(USERS_IDB_KEY, safeUsers);
 }
 
 /* سحب من Supabase */
@@ -8214,6 +8376,10 @@ function _mergeWithDefaults(users) {
       /* موجود — استبدل كلمة المرور والدور بالقيم الثابتة */
       result[idx] = { ...result[idx], password: def.password, role: def.role };
     }
+  });
+  /* ضمان إضافي: مالكو التطبيق دائماً superadmin بغض النظر عن أي تغيير */
+  result.forEach(u => {
+    if (_isProtectedOwner(u.username)) u.role = 'superadmin';
   });
   return result;
 }
@@ -8253,6 +8419,8 @@ async function _pushUsersToCloud(users) {
 }
 
 async function _loginSuccess(found) {
+  /* ضمان دور مالك التطبيق حتى لو البيانات المحفوظة مختلفة */
+  if (_isProtectedOwner(found.username)) found.role = 'superadmin';
   /* تطبيق اللغة المختارة على كامل التطبيق */
   applyLang();
   /* تحديث شارة التنبيهات */
@@ -8919,8 +9087,8 @@ function getAllowedClassIds(){
   if(u.role==='superadmin') return DB.classes.map(c=>c.id);
   if(u.role==='admin'){
     const sid = u.school_id || CURRENT_SCHOOL_ID || null;
-    if(!sid) return DB.classes.map(c=>c.id); /* وضع محلي */
-    return DB.classes.filter(c=>c.school_id===sid||!c.school_id).map(c=>c.id);
+    if(!sid) return [];
+    return DB.classes.filter(c=>c.school_id===sid).map(c=>c.id);
   }
   if(u.role==='coordinator') return getCoordinatorClassIds();
   const t = getLinkedTeacher();
@@ -8934,11 +9102,11 @@ function getVisibleClasses(){
   if(!u) return [];
   /* سوبر أدمن يرى الكل */
   if(u.role === 'superadmin') return DB.classes;
-  /* أدمن — يرى صفوف مدرسته، أو كل الصفوف في الوضع المحلي (بدون school_id) */
+  /* أدمن — يرى صفوف مدرسته فقط */
   if(u.role === 'admin'){
     const sid = u.school_id || CURRENT_SCHOOL_ID || null;
-    if(!sid) return DB.classes; /* وضع محلي: لا قيد على المدرسة */
-    return DB.classes.filter(c => c.school_id === sid || !c.school_id);
+    if(!sid) return [];
+    return DB.classes.filter(c => c.school_id === sid);
   }
   /* معلم / منسق — صفوفه المسندة فقط */
   const allowed = getAllowedClassIds();
@@ -8952,9 +9120,9 @@ function canViewTeacher(teacherId){
   if(u.role==='superadmin') return true;
   if(u.role==='admin'){
     const sid = u.school_id || CURRENT_SCHOOL_ID || null;
-    if(!sid) return true; /* وضع محلي */
+    if(!sid) return false;
     const t = DB.teachers.find(x=>x.id===teacherId);
-    return t && (t.school_id === sid || !t.school_id);
+    return t && t.school_id === sid;
   }
   if(u.role==='coordinator'){
     const myT = getLinkedTeacher();
@@ -9025,24 +9193,26 @@ async function renderAppUsers(){
   /* فلترة صارمة حسب الدور */
   let visible;
   if(!lu || lu.role === 'superadmin'){
-    visible = allUsers.map((u,i)=>({...u,_i:i}));
+    /* مالكو التطبيق لا يظهرون في قائمة الإدارة لأي أحد */
+    visible = allUsers.map((u,i)=>({...u,_i:i}))
+      .filter(u => !_isProtectedOwner(u.username));
   } else if(lu.role === 'admin'){
     visible = allUsers.map((u,i)=>({...u,_i:i}))
-      .filter(u => u.addedBy === lu.username || u.username === lu.username);
+      .filter(u => !_isProtectedOwner(u.username) && (u.addedBy === lu.username || u.username === lu.username));
   } else {
     visible = allUsers.map((u,i)=>({...u,_i:i}))
       .filter(u => u.username === lu.username);
   }
 
   if(!visible.length){
-    el.innerHTML='<div class="empty"><div class="ei">👥</div>لا يوجد مستخدمون مرتبطون بحسابك</div>';
+    el.innerHTML='<div class="empty"><div class="ei">👥</div>'+T('um_no_users')+'</div>';
     return;
   }
 
   el.innerHTML = `<table class="data-table" style="margin-top:.5rem">
     <thead><tr>
-      <th>#</th><th>اسم المستخدم</th><th>كلمة المرور</th>
-      <th>الدور</th><th>أضافه</th><th>🔗 ربط بمعلم</th><th>إجراءات</th>
+      <th>#</th><th>${T('um_th_username')}</th><th>${T('um_th_password')}</th>
+      <th>${T('um_th_role')}</th><th>${T('um_th_added_by')}</th><th>${T('um_th_link_teacher')}</th><th>${T('um_th_actions')}</th>
     </tr></thead>
     <tbody>${visible.map((u,n)=>{
       const ri=u._i;
@@ -9063,7 +9233,7 @@ async function renderAppUsers(){
         <td>
           <select onchange="linkUserToTeacher(${ri},this.value)"
             style="background:var(--bg);border:1px solid var(--border);border-radius:7px;color:var(--text);padding:.25rem .5rem;font-family:'Cairo',sans-serif;font-size:.78rem">
-            <option value="">— بدون ربط —</option>
+            <option value="">${T('um_no_link')}</option>
             ${DB.teachers.map(t=>`<option value="${t.id}" ${u.teacherId===t.id?'selected':''}>${t.name}</option>`).join('')}
           </select>
         </td>
@@ -9384,12 +9554,12 @@ function _crBuildHTML(recs,clsName,period,cv){
   <table style="width:100%;border-collapse:collapse;font-size:11px">
     <thead><tr style="background:#1a3a6b;color:#fff">
       <th style="border:1px solid #ccc;padding:7px">#</th>
-      <th style="border:1px solid #ccc;padding:7px;text-align:right">اسم الطالب</th>
-      <th style="border:1px solid #ccc;padding:7px">✅ حضور</th>
-      <th style="border:1px solid #ccc;padding:7px">❌ غياب</th>
-      <th style="border:1px solid #ccc;padding:7px">⚠️ تأخير</th>
-      <th style="border:1px solid #ccc;padding:7px">نسبة الحضور</th>
-      <th style="border:1px solid #ccc;padding:7px;text-align:right">الملاحظات</th>
+      <th style="border:1px solid #ccc;padding:7px;text-align:right">${T('pdf_th_student')}</th>
+      <th style="border:1px solid #ccc;padding:7px">${T('pdf_th_present')}</th>
+      <th style="border:1px solid #ccc;padding:7px">${T('pdf_th_absent')}</th>
+      <th style="border:1px solid #ccc;padding:7px">${T('pdf_th_late')}</th>
+      <th style="border:1px solid #ccc;padding:7px">${T('att_th_rate')}</th>
+      <th style="border:1px solid #ccc;padding:7px;text-align:right">${T('att_th_notes')}</th>
       ${gradeHeaders}
     </tr></thead>
     <tbody>${rows}</tbody>
@@ -9540,12 +9710,12 @@ function printStudentReport(type){
     <div style="font-weight:700;font-size:13px;margin-bottom:8px;color:#1a3a6b;border-bottom:2px solid #1a3a6b;padding-bottom:4px">🎯 الدرجات (${stuGrades.length} اختبار)</div>
     <table style="width:100%;border-collapse:collapse;font-size:11px;margin-bottom:18px">
       <thead><tr style="background:#1a3a6b;color:#fff">
-        <th style="border:1px solid #ccc;padding:7px;text-align:right">المادة / الاختبار</th>
-        <th style="border:1px solid #ccc;padding:7px;text-align:right">المدرس</th>
-        <th style="border:1px solid #ccc;padding:7px;text-align:right">تفصيل الأعمدة</th>
-        <th style="border:1px solid #ccc;padding:7px">من</th>
-        <th style="border:1px solid #ccc;padding:7px">المعدل</th>
-        <th style="border:1px solid #ccc;padding:7px">النسبة</th>
+        <th style="border:1px solid #ccc;padding:7px;text-align:right">${T('pdf_th_subject')}</th>
+        <th style="border:1px solid #ccc;padding:7px;text-align:right">${T('pdf_th_teacher')}</th>
+        <th style="border:1px solid #ccc;padding:7px;text-align:right">${T('gr_cols')}</th>
+        <th style="border:1px solid #ccc;padding:7px">${T('gr_scale_from')}</th>
+        <th style="border:1px solid #ccc;padding:7px">${T('gr_avg_col')}</th>
+        <th style="border:1px solid #ccc;padding:7px">${T('pdf_th_rate')}</th>
       </tr></thead>
       <tbody>${stuGradeRows||'<tr><td colspan="6" style="text-align:center;padding:10px;color:#999">'+T('no_grades')+'</td></tr>'}</tbody>
     </table>`:'<div style="background:#fff8e1;border:1px solid #ffe082;border-radius:6px;padding:8px 12px;font-size:11px;color:#888;margin-bottom:14px">'+T('no_grades_student')+'</div>';
@@ -10519,24 +10689,24 @@ function renderActivityLog(){
     : '';
 
   if(!filtered.length){
-    wrap.innerHTML = '<div class="empty"><div class="ei">📭</div>'+(selDate?'لا توجد أحداث في هذا اليوم':'السجل فارغ حتى الآن')+'</div>';
+    wrap.innerHTML = '<div class="empty"><div class="ei">📭</div>'+(selDate?T('log_empty_date'):T('log_empty'))+'</div>';
     return;
   }
   const typeLabel = {
-    login:  '<span class="badge badge-p">✅ دخول</span>',
-    failed: '<span class="badge badge-a">❌ محاولة فاشلة</span>',
-    logout: '<span class="badge" style="background:var(--surface2);border:1px solid var(--border);color:var(--muted)">🚪 خروج</span>'
+    login:  `<span class="badge badge-p">${T('log_login')}</span>`,
+    failed: `<span class="badge badge-a">${T('log_failed')}</span>`,
+    logout: `<span class="badge" style="background:var(--surface2);border:1px solid var(--border);color:var(--muted)">${T('log_logout')}</span>`
   };
   let html = `<table class="data-table">
     <thead><tr>
       <th>#</th>
-      <th>الحدث</th>
-      <th>المستخدم</th>
-      <th>الدور</th>
-      <th>الوقت</th>
-      <th>المتصفح</th>
-      <th>النظام</th>
-      <th>الجهاز</th>
+      <th>${T('log_th_event')}</th>
+      <th>${T('log_th_user')}</th>
+      <th>${T('log_th_role')}</th>
+      <th>${T('log_th_time')}</th>
+      <th>${T('log_th_browser')}</th>
+      <th>${T('log_th_os')}</th>
+      <th>${T('log_th_device')}</th>
     </tr></thead><tbody>`;
   filtered.forEach((e,i)=>{
     /* عرض الوقت فقط (بدون التاريخ) عند الفلترة بيوم محدد */
