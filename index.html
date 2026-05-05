@@ -534,6 +534,9 @@ select option{background:var(--surface)}
 .bell-icon.ringing{animation:bell-ring .6s ease}
 @keyframes pe-shake{0%,100%{transform:translateX(-50%) scale(1)}10%,30%,50%,70%,90%{transform:translateX(calc(-50% - 4px)) scale(1.03)}20%,40%,60%,80%{transform:translateX(calc(-50% + 4px)) scale(1.03)}}
 .period-notif.pe-notif{background:linear-gradient(135deg,#1a4f8a,#2563eb);border-color:#3b82f6;animation:pe-shake .5s ease 4}
+.period-notif-overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:99999;display:flex;align-items:center;justify-content:center;padding:1.5rem;backdrop-filter:blur(4px);animation:tin .25s ease}
+.period-notif-overlay>div{background:linear-gradient(135deg,#1a7f37,#2ea043);border:2px solid #3fb950;border-radius:20px;padding:2rem 2.5rem;color:#fff;font-family:'Cairo',sans-serif;box-shadow:0 20px 60px rgba(0,0,0,.6);max-width:380px;width:100%}
+@keyframes bell-ring{0%,100%{transform:rotate(0)}25%{transform:rotate(-20deg)}75%{transform:rotate(20deg)}}
 /* ── NOTES ── */
 .note-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1rem;margin-bottom:.75rem;transition:border .2s}
 .note-card:hover{border-color:var(--accent)}
@@ -1922,6 +1925,7 @@ select option{background:var(--surface)}
       </div>
       <div style="display:flex;gap:.5rem;flex-wrap:wrap">
         <button class="btn btn-ghost btn-sm" id="gr-change-btn" onclick="backToGradesSetup()">← تغيير</button>
+        <button class="btn btn-sm" id="gr-formula-entry-btn" onclick="openFormulaBuilder()" style="background:linear-gradient(135deg,#7c3aed,#5b21b6);color:#fff;border:none;border-radius:9px;font-family:Cairo,sans-serif;font-size:.82rem;font-weight:700;cursor:pointer">🔀 المعادلة</button>
         <button class="btn btn-success btn-sm" id="gr-save-btn" onclick="saveGrades()">💾 حفظ</button>
         <button class="btn btn-primary btn-sm" id="gr-pdf-btn" onclick="exportGradesPDF()">📄 PDF</button>
         <button class="btn btn-ghost btn-sm" id="gr-word-btn" onclick="exportGradesWord()">📝 Word</button>
@@ -7091,43 +7095,70 @@ function isPETeacher(tid){
 function playPeriodBell(isPE){
   try{
     const ctx = new(window.AudioContext||window.webkitAudioContext)();
-    // رنة أولى
-    const ring1 = (t)=>{
+    const ring = (t, freq1, freq2, freq3, vol)=>{
       const osc=ctx.createOscillator(), g=ctx.createGain();
       osc.connect(g); g.connect(ctx.destination);
-      osc.frequency.setValueAtTime(1046,t); // دو
-      osc.frequency.setValueAtTime(1318,t+.12); // مي
-      osc.frequency.setValueAtTime(1568,t+.24); // صول
-      g.gain.setValueAtTime(.4,t);
-      g.gain.exponentialRampToValueAtTime(.001,t+.7);
-      osc.start(t); osc.stop(t+.7);
+      osc.frequency.setValueAtTime(freq1,t);
+      osc.frequency.setValueAtTime(freq2,t+.15);
+      osc.frequency.setValueAtTime(freq3,t+.30);
+      g.gain.setValueAtTime(vol,t);
+      g.gain.exponentialRampToValueAtTime(.001,t+.85);
+      osc.start(t); osc.stop(t+.85);
     };
-    ring1(ctx.currentTime);
+    const T = ctx.currentTime;
+    // 3 رنات متتالية واضحة
+    ring(T,      1047, 1319, 1568, 0.7); // دو مي صول
+    ring(T+0.95, 1047, 1319, 1568, 0.7);
+    ring(T+1.90, 1047, 1319, 2093, 0.85); // رنة ختامية أعلى
     if(isPE){
-      // رنة ثانية بعد ثانية
-      ring1(ctx.currentTime+1.1);
-      // هزاز (Vibration API)
-      if(navigator.vibrate){
-        navigator.vibrate([300,200,300,200,500]);
-      }
+      ring(T+2.85, 1319, 1568, 2093, 0.85);
+      ring(T+3.80, 1319, 1568, 2093, 0.85);
+    }
+    // هزاز
+    if(navigator.vibrate){
+      navigator.vibrate(isPE?[400,150,400,150,600,150,400]:[300,150,300,150,500]);
     }
   }catch(e){}
 }
 
 function showPeriodNotif(msg, isPE){
   // إزالة أي تنبيه سابق
-  document.querySelectorAll('.period-notif').forEach(el=>el.remove());
+  document.querySelectorAll('.period-notif,.period-notif-overlay').forEach(el=>el.remove());
+
+  /* ── 1. شريط التنبيه المعتاد ── */
   const div = document.createElement('div');
   div.className = 'period-notif' + (isPE?' pe-notif':'');
   div.innerHTML = `<span class="bell-icon" id="bell-anim">🔔</span> ${msg}`;
-  div.onclick = ()=>div.remove();
+  div.onclick = ()=>{ div.remove(); ov.remove(); };
   document.body.appendChild(div);
-  // تحريك الجرس
+
+  /* ── 2. غطاء واضح في المنتصف ── */
+  const ov = document.createElement('div');
+  ov.className = 'period-notif-overlay';
+  ov.innerHTML = `
+    <div style="text-align:center">
+      <div style="font-size:3rem;margin-bottom:.5rem;animation:bell-ring .4s ease 4">🔔</div>
+      <div style="font-size:1.15rem;font-weight:900;margin-bottom:.4rem">${msg}</div>
+      <div style="font-size:.8rem;opacity:.75;margin-bottom:1rem">انقر للإغلاق</div>
+      <button onclick="this.closest('.period-notif-overlay').remove();document.querySelectorAll('.period-notif').forEach(e=>e.remove())"
+        style="background:rgba(255,255,255,.2);border:2px solid rgba(255,255,255,.6);border-radius:10px;color:#fff;padding:.5rem 1.5rem;font-family:Cairo,sans-serif;font-size:.9rem;font-weight:700;cursor:pointer">
+        ✓ تم الاطلاع
+      </button>
+    </div>`;
+  ov.onclick = (e)=>{ if(e.target===ov){ ov.remove(); div.remove(); } };
+  document.body.appendChild(ov);
+
+  /* تحريك الجرس */
   setTimeout(()=>{
     const b = document.getElementById('bell-anim');
     if(b){ b.classList.add('ringing'); setTimeout(()=>b.classList.remove('ringing'),700); }
   },50);
-  setTimeout(()=>{ if(div.parentNode) div.remove(); }, 12000);
+
+  /* اختفاء تلقائي بعد 8 ثوانٍ */
+  setTimeout(()=>{
+    if(div.parentNode) div.remove();
+    if(ov.parentNode) ov.remove();
+  }, 8000);
 }
 
 /* طلب إذن الإشعارات عند أول تفاعل — لدعم أندرويد */
@@ -7187,6 +7218,7 @@ function checkPeriodAlerts(){
             playPeriodBell(isPE);
             showPeriodNotif(msg, isPE);
             sendSystemNotif('🔔 تنبيه بداية الحصة', msg);
+            sendSWNotif('🔔 تنبيه بداية الحصة', msg);
           }
         }
       }
@@ -7216,14 +7248,54 @@ function checkPeriodAlerts(){
   });
 }
 
-// تشغيل الفحص كل 20 ثانية
+// تشغيل الفحص كل 15 ثانية
 function _startPeriodAlertLoop(){
   if(_periodAlertTimer) clearInterval(_periodAlertTimer);
   checkPeriodAlerts();
-  _periodAlertTimer = setInterval(checkPeriodAlerts, 20000);
+  _periodAlertTimer = setInterval(checkPeriodAlerts, 15000);
 }
 // تشغيل تلقائي بعد تحميل الصفحة
 document.addEventListener('DOMContentLoaded', ()=>{ setTimeout(_startPeriodAlertLoop, 2500); });
+
+/* ── عند عودة المستخدم للتطبيق بعد الخلفية ── */
+document.addEventListener('visibilitychange', ()=>{
+  if(document.visibilityState === 'visible'){
+    /* أعد فحص التنبيهات فوراً عند العودة */
+    checkPeriodAlerts();
+    /* أعد تشغيل المؤقت لو كان متوقفاً */
+    _startPeriodAlertLoop();
+  }
+});
+
+/* ── Service Worker Registration للإشعارات في الخلفية ── */
+(function _registerSW(){
+  if(!('serviceWorker' in navigator)) return;
+  const swCode = `
+self.addEventListener('message', e => {
+  if(e.data && e.data.type === 'PERIOD_ALERT'){
+    self.registration.showNotification(e.data.title, {
+      body: e.data.body,
+      icon: 'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔔</text></svg>',
+      badge: 'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔔</text></svg>',
+      vibrate: [300,150,300,150,500],
+      requireInteraction: true,
+      tag: 'period-alert'
+    });
+  }
+});`;
+  const blob = new Blob([swCode], {type:'application/javascript'});
+  const swUrl = URL.createObjectURL(blob);
+  navigator.serviceWorker.register(swUrl).then(reg=>{
+    window._swReg = reg;
+  }).catch(()=>{});
+})();
+
+/* إرسال إشعار عبر Service Worker (يظهر حتى في الخلفية) */
+function sendSWNotif(title, body){
+  if(window._swReg && window._swReg.active){
+    window._swReg.active.postMessage({type:'PERIOD_ALERT', title, body});
+  }
+}
 
 function deleteLesson(tid, key){
   if(!DB.schedule[tid]) return;
@@ -9055,16 +9127,16 @@ function coordCreateMeeting(){
   const participantIds = [...document.querySelectorAll('#coord-mtg-participants input:checked')].map(cb=>cb.value);
   const invitedTeachers = DB.teachers.filter(t=>participantIds.includes(t.id)).map(t=>({id:t.id,name:t.name}));
 
-  if(!DB.meetings) DB.meetings = [];
-  DB.meetings.push({
-    id:uid(), title, date, time, description:desc,
+  const _allMtgs = getMeetings();
+  const _dt = date && time ? date + 'T' + time : '';
+  _allMtgs.push({
+    id:uid(), title, date, time, datetime:_dt, description:desc,
     type:'coordinator', subject:myT?.subject||'',
     createdBy:u?.username||'', coordinatorTeacherId:myT?.id||'',
     participantIds, invitedTeachers, roomType:'builtin', duration:60,
     created_at:new Date().toISOString()
   });
-  persist();
-  if(typeof _autoSyncToCloud==='function') _autoSyncToCloud();
+  saveMeetings(_allMtgs);
 
   document.getElementById('coord-meeting-form').style.display='none';
   ['coord-mtg-title','coord-mtg-date','coord-mtg-time','coord-mtg-desc'].forEach(id=>{
@@ -10990,6 +11062,14 @@ function renderMeetings(){
       if(Array.isArray(m.participantIds) && myTeacher && m.participantIds.includes(myTeacher.id)) return true;
       // فحص invitedTeachers (الحقل الموحد)
       if(Array.isArray(m.invitedTeachers) && myTeacher && m.invitedTeachers.some(t => t.id === myTeacher?.id)) return true;
+      // اجتماع المنسق — كل معلمي المادة مدعوون تلقائياً إذا لم يُحدَّد participantIds
+      if(m.type === 'coordinator' && myTeacher) {
+        // إذا لم يكن هناك participantIds محدد → الدعوة لكل معلمي نفس المادة
+        if(!Array.isArray(m.participantIds) || m.participantIds.length === 0) {
+          const coordTeacher = DB.teachers.find(t => t.id === m.coordinatorTeacherId);
+          if(coordTeacher && coordTeacher.subject && myTeacher.subject === coordTeacher.subject) return true;
+        }
+      }
       return false;
     });
   } else {
@@ -12725,18 +12805,21 @@ function _buildStudentCard(s, cls_, school, logo, now){
 }
 
 function printClassReportCards(type){
-  document.getElementById('class-report-modal').style.display='none';
   const selCls = document.getElementById('cr-class')?.value;
+  // ⛔ منع الطباعة إذا لم يختر صفاً محدداً
+  if(!selCls || selCls==='all'){
+    toast('⚠️ يرجى اختيار صف محدد أولاً قبل طباعة الشهادات','err');
+    return;
+  }
+  document.getElementById('class-report-modal').style.display='none';
   const school = DB.settings.schoolName||'المدرسة';
   const logo = DB.settings.schoolLogo||'';
   const now = new Date().toLocaleDateString('ar-SA-u-nu-latn',{year:'numeric',month:'long',day:'numeric'});
 
-  // حدد الطلاب
-  const students = selCls&&selCls!=='all'
-    ? DB.students.filter(s=>s.classId===selCls)
-    : DB.students;
+  // حدد الطلاب من الصف المختار فقط
+  const students = DB.students.filter(s=>s.classId===selCls);
 
-  if(!students.length){ toast('⚠️ لا يوجد طلاب','err'); return; }
+  if(!students.length){ toast('⚠️ لا يوجد طلاب في هذا الصف','err'); return; }
 
   if(type==='pdf'){
     // PDF: صفحة لكل طالب
